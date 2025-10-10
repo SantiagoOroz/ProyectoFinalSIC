@@ -1,6 +1,6 @@
 # ProyectoFinalSIC
-Equipo: 
-Comisión 1
+Equipo:<br>
+Comisión 1  
 
 Integrantes:
 Santiago Oroz - Milagros Argañin - Renata Berho
