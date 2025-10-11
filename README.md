@@ -1,5 +1,5 @@
 # ProyectoFinalSIC
-Equipo:<br>
+Equipo: Sportics<br>
 Comisión 1  
 
 Integrantes:
