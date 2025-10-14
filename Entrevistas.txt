@@ -1,0 +1,134 @@
+Objetivo: Recopilar información sobre las necesidades, hábitos digitales, emociones y preferencias de las personas mayores para entrenar un asistente virtual empático, accesible y útil.
+
+
+A. Datos generales
+• ¿Cuál es tu nombre? (opcional)
+• ¿En qué ciudad vivís?
+• ¿Cuál es tu rango de edad? (60-64, 65-69, 70-74, 75-79, 80+)
+• ¿Vivís solo/a o acompañado/a?
+• ¿Tenés familiares o amigos que te ayudan con la tecnología?
+
+
+B. Dispositivos y uso de tecnología
+• ¿Qué dispositivos usás con frecuencia? (celular, tablet, computadora)
+• ¿Tenés acceso a internet en tu casa?
+• ¿Usás Wi-Fi o datos móviles?
+• ¿Usás auriculares o parlantes cuando escuchás audios?
+• ¿Con qué frecuencia usás el celular por día?
+• ¿Qué aplicaciones usás más? (WhatsApp, Facebook, YouTube, etc.)
+• ¿Te resulta fácil escribir mensajes?
+• ¿Preferís mandar audios o escribir mensajes?
+• ¿Usás comandos de voz como 'Ok Google' o 'Siri'?
+• ¿Sabés sacar fotos y enviarlas por WhatsApp o Telegram?
+
+
+C. Comunicación digital
+• ¿Con quién hablás más por celular o por WhatsApp?
+• ¿Qué tipo de mensajes te gusta recibir? (familiares, información, salud, entretenimiento)
+• ¿Cuándo algo no funciona, pedís ayuda a alguien o intentás resolverlo solo/a?
+• ¿Qué hacés cuando no entendés un mensaje o una app?
+• ¿Te gustaría que el asistente te hable con voz humana o sintética?
+• ¿Preferís que las respuestas sean cortas o más detalladas?
+• ¿Querés que el asistente te repita la información si no la entendés?
+
+
+D. Pagos y trámites
+• ¿Pagás tus facturas vos o alguien te ayuda?
+• ¿Qué servicios pagás regularmente? (luz, gas, agua, internet, teléfono, cable)
+• ¿Dónde pagás tus facturas? (Rapipago, PagoMisCuentas, app del banco, etc.)
+• ¿Usás MercadoPago u otra app para pagar?
+• ¿Sabés leer el importe y la fecha de vencimiento en las boletas?
+• ¿Qué parte de una boleta te resulta más difícil de entender?
+• ¿Qué te gustaría que el asistente te diga cuando le mostrás una boleta?
+• ¿Qué sentís cuando no podés pagar o no entendés una factura?
+
+
+E. Emociones y empatía
+• ¿Qué te hace sentir frustrado/a cuando usás el celular o una app?
+• ¿Qué te da confianza en un asistente virtual?
+• ¿Cómo te gustaría que el asistente te hable cuando estás enojado/a o frustrado/a?
+• ¿Qué frases te resultan reconfortantes o agradables?
+• ¿Te gustaría que el asistente te recuerde cosas importantes (turnos, pagos)?
+• ¿Cómo te gustaría que te lo recuerde? (mensaje, audio, llamada)
+• ¿Qué emociones te gustaría que el asistente reconozca? (frustración, alegría, ansiedad, etc.)
+
+
+F. Accesibilidad y formato
+• ¿Tenés dificultades para leer letras pequeñas?
+• ¿Preferís texto grande o audios?
+• ¿Qué tipo de letra te resulta más fácil de leer?
+• ¿Qué colores te resultan más cómodos para leer en pantalla?
+• ¿Tenés algún problema de audición?
+• ¿Te gustaría poder ajustar el volumen o la velocidad de los audios?
+• ¿Preferís que los pasos se den de a uno por vez o todos juntos?
+• ¿Querés que el asistente te confirme cuando termina una tarea?
+
+
+G. Confianza y privacidad
+• ¿Te sentís cómodo/a compartiendo datos con un asistente digital?
+• ¿Qué información no te gustaría que guarde?
+• ¿Querés poder borrar tus datos cuando quieras?
+• ¿Qué te haría confiar más en un asistente?
+• ¿Te gustaría que te explique para qué usa la información que guardás?
+
+
+H. Sugerencias y expectativas
+• ¿En qué te gustaría que el asistente te ayude más seguido?
+• ¿Qué te gustaría que el asistente nunca haga?
+• ¿Querés que el asistente te hable de temas de interés (noticias, salud, recetas, etc.)?
+• ¿Qué temas te gustaría que evite?
+• ¿Qué frases o palabras preferís que no use?
+• ¿Cómo te gustaría que se llame el asistente?
+
+
+I. Preguntas adicionales sugeridas (50+)
+• ¿Usás calendario o anotaciones para recordar pagos?
+• ¿Sabés usar el cajero automático sin ayuda?
+• ¿Usás alguna aplicación del banco?
+• ¿Tenés una cuenta de correo electrónico?
+• ¿Sabés cómo recuperar una contraseña olvidada?
+• ¿Tenés miedo de tocar algo y borrar información importante?
+• ¿Alguna vez te pasó que te cobraron algo mal en una factura?
+• ¿Sabés cómo contactar a tu banco o proveedor de servicio?
+• ¿Usás emojis o stickers en tus mensajes?
+• ¿Qué te gustaría que el asistente te recuerde todos los días?
+• ¿Qué hacés cuando te sentís solo/a?
+• ¿Te gustaría que el asistente te salude todos los días?
+• ¿Qué música te gusta escuchar?
+• ¿Querés que el asistente te lea noticias?
+• ¿Querés que te diga el clima del día?
+• ¿Querés que te avise cuando haya feriados o cobros de jubilación?
+• ¿Querés que te recuerde tomar agua o caminar?
+• ¿Te gustaría poder mandarle audios al asistente para que te transcriba?
+• ¿Te gustaría que te ayude a enviar mensajes a familiares?
+• ¿Querés que reconozca tu tono de voz para saber cómo te sentís?
+• ¿Preferís que tenga voz masculina o femenina?
+• ¿Te gustaría que use tu nombre cuando te habla?
+• ¿Querés que te llame por apodo o nombre completo?
+• ¿Qué tipo de lenguaje te resulta más claro: formal o cotidiano?
+• ¿Querés que te avise cuando tenés mensajes sin leer?
+• ¿Te gustaría poder hacer videollamadas con ayuda del asistente?
+• ¿Te gustaría que el asistente te acompañe cuando haces trámites online?
+• ¿Qué parte de una app te resulta más difícil (botones, texto, opciones)?
+• ¿Te gustaría que el asistente tenga humor?
+• ¿Te gustaría que use frases locales (argentinas)?
+• ¿Querés que el asistente te diga cuándo algo no es seguro o puede ser una estafa?
+• ¿Te gustaría poder mandarle fotos de documentos para que te los lea?
+• ¿Querés que el asistente te ayude con recetas o comidas?
+• ¿Qué hacés cuando te llega un mail que no entendés?
+• ¿Te gustaría que el asistente te ayude a hacer videollamadas con familiares?
+• ¿Qué redes sociales usás o te gustaría usar?
+• ¿Te gustaría recibir mensajes motivadores o positivos?
+• ¿Qué te da más confianza: leer o escuchar?
+• ¿Te gustaría que el asistente te avise si nota que estás enojado o triste?
+• ¿Querés que el asistente te ofrezca llamar a alguien cuando detecte que estás mal?
+• ¿Preferís respuestas automáticas o que el asistente te pregunte antes de actuar?
+• ¿Qué hacés cuando no recordás una contraseña?
+• ¿Qué sentís cuando una app te pide muchos permisos?
+• ¿Qué palabra o frase te haría confiar en el asistente?
+• ¿Te gustaría que el asistente recuerde tus gustos? (ej. café, música, programas)
+• ¿Qué horario del día usás más el celular?
+• ¿Qué te gustaría que el asistente te enseñe?
+• ¿Querés que el asistente te ayude con salud y ejercicios?
+• ¿Qué te preocupa de usar tecnología nueva?
+• ¿Qué haría que recomiendes el asistente a otros adultos mayores?
