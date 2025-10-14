@@ -1,0 +1,74 @@
+Objetivo: Estandarizar cómo anotamos mensajes y medios para entrenar el NLU (intención + sentimiento) y ofrecer respuestas empáticas y accesibles.
+
+
+1) Estructura del dataset (CSV sugerido)
+utterances.csv → columnas: id, texto, intent, subintent, sentimiento, canal, preferencias_formato, confidencial
+examples_media.csv → columnas: id, utterance_id, tipo_media (foto/audio), anotaciones (importe, vencimiento, etc.), consentimiento (sí/no), url_segura
+personas.csv (opcional) → columnas: id, perfil_cluster, rasgos, necesidades, preferencias_accesibilidad
+
+
+2) Taxonomía de intenciones (intents) y subintenciones
+pagar_factura: luz, gas, agua, internet, expensas
+leer_boleta: importe, vencimiento, codigo, total_con_recargo
+turno_medico: pedir, confirmar, recordar, cancelar
+mensajeria: enviar_audio, enviar_mensaje, enviar_email
+tramite: ANSES, PAMI, DNI, AFIP
+transporte: horarios, como_llegar, remis
+explicar_termino: palabra, sigla, icono
+soporte_tecnico: no_anda_app, no_entra_cuenta, restablecer_clave
+ayuda_humana: familiar, soporte
+smalltalk: saludo, agradecimiento, despedida
+
+
+3) Catálogo de sentimientos
+frustracion, confusion, ansiedad_suave, agradecimiento, neutral, temor_a_equivocarse, apuro, enojo, alivio
+
+
+4) Guía de etiquetado (pasos)
+    1) Leer el mensaje completo (texto o transcripción).
+    2) Asignar INTENT principal y, si corresponde, SUBINTENT.
+    3) Asignar SENTIMIENTO (señal explícita primero).
+    4) Señalar PREFERENCIAS (audio/texto/pasos).
+    5) Marcar CONFIDENCIAL=true si incluye datos sensibles (DNI, CBU, tarjeta, domicilio).
+    6) En fotos de boletas: anotar campos extraídos (servicio, importe, vencimiento, recargo, código).
+
+
+5) Ejemplos anotados
+    A: 'No entiendo cuánto pagar' → intent=leer_boleta, subintent=importe, sentimiento=frustracion
+    B: 'Se me vence hoy el gas, ¿cómo pago por el celular?' → intent=pagar_factura, subintent=gas, sentimiento=apuro
+    C: Foto: '¿Esto vence mañana?' → intent=leer_boleta, subintent=vencimiento, sentimiento=confusion
+    D: 'Gracias por la ayuda' → intent=smalltalk, subintent=agradecimiento, sentimiento=agradecimiento
+
+
+6) Plantillas empáticas
+    Reconocimiento: 'Entiendo que esto puede ser confuso. Estoy con vos; lo resolvemos paso a paso.'
+    Confirmación: '¿Lo hacemos ahora o te envío un recordatorio?'
+    No entendido: '¿Podés mandarme una foto o decirme “no entiendo el importe / vencimiento”?'
+    Humano: 'Si querés, puedo pedir que alguien te llame. ¿Te parece?'
+    Cierre: 'Listo, ya está. Si necesitás, te explico de nuevo con calma.'
+
+
+7) Accesibilidad
+Texto grande y contrastado; pasos cortos y numerados; audios <20 s; explicar siglas; ofrecer texto+audio+imagen; confirmar pasos.
+
+
+8) Privacidad y consentimiento
+Solicitar consentimiento explícito; mostrar resumen de datos guardados; permitir borrado fácil; no pedir datos sensibles sin necesidad clara.
+
+
+9) Pipeline de mejora continua
+Recolectar → Etiquetar → Entrenar/ajustar NLU → Validar → Desplegar → Monitorear → Retroalimentar dataset.
+Métricas: exactitud de intención, F1 por clase, precisión de sentimiento, % resolución sin humano, tiempo medio de tarea, NPS.
+
+
+10) Anexo: intents/subintents
+    - pagar_factura: luz, gas, agua, internet, expensas
+    - leer_boleta: importe, vencimiento, codigo, total_con_recargo
+    - turno_medico: pedir, confirmar, recordar, cancelar
+    - mensajeria: enviar_audio, enviar_mensaje, enviar_email
+    - tramite: ANSES, PAMI, DNI, AFIP
+    - transporte: horarios, como_llegar, remis
+    - explicar_termino: palabra, sigla, icono
+    - soporte_tecnico: no_anda_app, no_entra_cuenta, restablecer_clave
+    - ayuda_humana: familiar, soporte
+    - smalltalk: saludo, agradecimiento, despedida
