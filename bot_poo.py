@@ -12,6 +12,14 @@ from pydub import AudioSegment
 # ---------------------------------------------
 responder_con_audio = True
 # ----------------------------
+# --- ID de las voces en español que podés usar ---
+# Encontrarás muchas más si buscás en la lista completa.
+VOICE_ES_AR = "es-AR-ElenaNeural"        # Argentina (Femenina)
+VOICE_ES_MX = "es-MX-DaliaNeural"        # México (Femenina)
+VOICE_ES_ES = "es-ES-ElviraNeural"       # España (Femenina)
+VOICE_ES_CO = "es-CO-SalomeNeural"       # Colombia (Femenina)
+VOICE_ES_AR_M = "es-AR-TomasNeural"      # Argentina (Masculina)
+# ----------------------------
 
 class SpeechService:
     """Maneja audio (voz a texto, texto a voz) usando Whisper y Edge-TTS."""
@@ -22,7 +30,7 @@ class SpeechService:
         print(f"Cargando el modelo Whisper '{model_size}'...")
         self.model = whisper.load_model(model_size)
         self.language = "es" # Idioma
-        self.default_tts_voice = "es-AR-ElenaNeural" # Voz por defecto
+        self.default_tts_voice = VOICE_ES_AR # Voz por defecto
     
     def transcribe(self, audio_bytes: bytes) -> str:
         """
