@@ -1,4 +1,5 @@
 import requests
+from transformers import pipeline
 
 class SpeechService:
     """Maneja audio (voz a texto, texto a voz)."""
@@ -14,14 +15,35 @@ class VisionService:
     def analyze_image(self, image_bytes: bytes):
         return "Texto o descripción detectada en la imagen"
 
+class SentimentAnalyzer:
+    """Analiza el sentimiento de un texto usando transformers."""
+    def __init__(self, model_name="pysentimiento/robertuito-sentiment-analysis"):
+        print("🔄 Cargando modelo de análisis de sentimiento...")
+        self.analyzer = pipeline("sentiment-analysis", model=model_name)
+        print("✅ Modelo de sentimiento cargado.")
 
+    def analyze(self, text: str) -> str:
+        result = self.analyzer(text)[0]
+        sentimiento = result['label']
+        confianza = result['score']
+
+        emoji = "❓"
+        if sentimiento == "POS":
+            emoji = "😊"
+        elif sentimiento == "NEG":
+            emoji = "😟"
+        elif sentimiento == "NEU":
+            emoji = "😐"
+
+        return f"Sentimiento: {sentimiento} {emoji} (Confianza: {confianza:.2%})"
+    
 class NLUService:
     """Procesamiento del lenguaje natural (respuestas inteligentes)."""
-    def __init__(self, api_key: str, api_url: str, system_prompt="Eres un asistente general amable y claro."):
+    def __init__(self, api_key, api_url, system_prompt="Eres un asistente digital paciente y claro que enseña a personas mayores a usar tecnología. Explica las cosas paso a paso, con ejemplos sencillos, sin tecnicismos y usando un tono amable y alentador."):
         self.system_prompt = system_prompt
         self.api_key = api_key
         self.api_url = api_url
-        self.model = "llama-3.3-70b-versatile"
+        self.model = "llama3-70b-8192"
 
     def get_response(self, user_text: str) -> str:
         
@@ -47,8 +69,8 @@ class NLUService:
                 return respuesta.strip()
             else:
                 # Manejo de errores de la API
-                error_info = resp.json().get('error', {}).get('message', 'Error desconocido.')
-                return f" [Error IA {resp.status_code}] No pude generar una respuesta."
+                error_info = resp.json().get('error', {}).get('message', resp.text)
+                return f"[Error IA {resp.status_code}] No pude generar una respuesta. Detalle: {error_info}"
         
         except requests.exceptions.RequestException as e:
             # Manejo de errores de conexión o timeout
@@ -67,12 +89,13 @@ class SessionManager:
 
 class ModularBot:
     """Plantilla general del bot orientado a objetos."""
-    def __init__(self, bot_instance, nlu, speech, vision, sessions):
+    def __init__(self, bot_instance, nlu, speech, vision, sentiment, sessions):
         self.bot = bot_instance
         self.nlu = nlu
         self.speech = speech
         self.vision = vision
         self.sessions = sessions
+        self.sentiment = sentiment
         self._setup_handlers()
 
     def _setup_handlers(self):
@@ -80,11 +103,21 @@ class ModularBot:
         def handle_start(msg):
             session = self.sessions.ensure(msg.chat.id)
             if not session["greeted"]:
-                welcome = "👋 ¡Hola! Soy tu asistente digital. Enviame texto, audio o fotos para empezar 🚀"
+                welcome = "👋 ¡Hola! Soy tu asistente digital. Podemos practicar juntos cosas como enviar correos, usar el celular, hacer videollamadas o aprender qué es una app. Escribime o mandame un audio para empezar 😊"
                 self.bot.reply_to(msg, welcome)
                 session["greeted"] = True
             else:
-                self.bot.reply_to(msg, "Ya estamos en marcha 😊")
+                self.bot.reply_to(msg, "¡Qué alegría volver a verte! ¿Seguimos aprendiendo algo nuevo hoy?")
+
+        @self.bot.message_handler(commands=["sentimiento"])
+        def handle_sentiment(msg):
+             self.bot.send_chat_action(msg.chat.id, "typing")
+             texto_para_analizar = msg.text.replace("/sentimiento", "").strip()
+             if not texto_para_analizar:
+                 self.bot.reply_to(msg, "Por favor, escribe una frase después del comando /sentimiento para que pueda analizarla. 😊")
+                 return
+             resultado = self.sentiment.analyze(texto_para_analizar)
+             self.bot.reply_to(msg, resultado)
 
         @self.bot.message_handler(content_types=["text"])
         def handle_text(msg):
