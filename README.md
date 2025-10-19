@@ -1,5 +1,5 @@
 # ProyectoFinalSIC
-Equipo: Sportics<br>
+Equipo: The Pythonauts<br>
 Comisión 1  
 
 Integrantes:
