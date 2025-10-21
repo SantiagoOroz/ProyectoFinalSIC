@@ -1,11 +1,30 @@
-edge_tts==7.2.3
-openai_whisper==20250625
-pydub==0.25.1
-pyTelegramBotAPI==4.29.1
-python-dotenv==1.1.1
-Requests==2.32.5
-torch==2.8.0
-pyTelegramBotAPI==4.20.0
-groq==0.9.0
-supabase==2.6.0
-python-dotenv==1.0.1
+
+#Corres en la terminal 
+#pip install -r requirements.txt
+
+
+# === CORE DEL BOT ===
+pyTelegramBotAPI==4.29.1        # Bot de Telegram
+python-dotenv==1.1.1            # Cargar variables desde .env
+Requests==2.32.5                # Peticiones HTTP (ya usada por Supabase)
+
+# === MODELOS Y LENGUAJE ===
+groq==0.9.0                     # Cliente Groq (modelos multimodales)
+supabase==2.6.0                 # SDK de Supabase para subir imágenes y firmar URLs
+
+# === AUDIO Y TRANSCRIPCIÓN ===
+edge_tts==7.2.3                 # Text to Speech (voz)
+openai_whisper==20250625        # Transcripción de audio (Whisper)
+pydub==0.25.1                   # Manipulación de audio
+torch==2.8.0                    # Requerido por Whisper y Groq internamente
+
+# === IMÁGENES Y OCR ===
+pillow==10.4.0                  # Manipular imágenes (PIL)
+pytesseract==0.3.10             # OCR local (si no usás Groq para OCR)
+
+# === OPCIONALES (Google Vertex / Nano Banana) ===
+google-cloud-aiplatform==1.63.0 # Vertex AI SDK (para editar/generar imágenes)
+vertexai==1.63.0                # Librería complementaria de Vertex (a veces incluida)
+
+# === EXTRA (por compatibilidad o futuros módulos) ===
+typing-extensions>=4.7.0        # Soporte de tipos moderno
