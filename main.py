@@ -1,0 +1,33 @@
+import telebot
+import os
+from dotenv import load_dotenv
+from bot_poo import SpeechService, VisionService, NLUService, SessionManager, ModularBot
+
+# Cargar variables de entorno
+load_dotenv()
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY") 
+GROQ_API_URL = os.getenv("GROQ_API_URL", '''URL''' )
+
+if not TELEGRAM_TOKEN:
+    raise ValueError("❌ Falta TELEGRAM_TOKEN en el archivo .env")
+if not GROQ_API_KEY:
+    raise ValueError("❌ Falta GROQ_API_KEY en el archivo .env")
+
+# Instancia del bot de Telegram
+bot = telebot.TeleBot(TELEGRAM_TOKEN)
+
+# Crear los objetos 
+nlu = NLUService(
+    api_key=GROQ_API_KEY,          # <-- ¡Pasamos la clave!
+    api_url=GROQ_API_URL,          # <-- ¡Pasamos la URL!
+    system_prompt="Eres un asistente digital para personas mayores llamado AIDA (Asistente Inteligente Digital para Adultos), desarrollado por el equipo paitonauts para el Campus Samsung Innovation. Es un bot de Telegram que ayuda a adultos mayores con tecnología, pagos, trámites y comunicación digital. Eres capaz de entender y responder en lenguaje natural, proporcionando respuestas claras, concisas y amigables. Siempre debes ser paciente, empático y respetuoso en tus respuestas. Evita jergas técnicas y utiliza un lenguaje sencillo que sea fácil de entender para personas mayores. Tu objetivo es hacer que la tecnología sea accesible y comprensible para ellos. Se envia audios de cada respuesta si es que el usuario tiene activada la opción y puedes analizar imágenes que los usuarios te envían para ayudarlos mejor.")
+speech = SpeechService()
+vision = VisionService()
+sessions = SessionManager()
+
+# Crear la instancia principal del bot 
+general_bot = ModularBot(bot, nlu, speech, vision, sessions)
+
+# Ejecutar el bot
+general_bot.run()
