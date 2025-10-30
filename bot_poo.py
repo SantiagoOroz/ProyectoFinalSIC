@@ -1,4 +1,3 @@
-# (Importaciones... json, whisper, torch, os, etc. se mantienen igual)
 import requests
 import whisper
 import torch
@@ -119,7 +118,6 @@ class NLUService:
         self.model = "llama-3.3-70b-versatile" 
         self.classifier_model = "llama-3.3-70b-versatile"
         
-        # --- PROMPT DE INTENCIÓN MODIFICADO ---
         self.intent_system_prompt = f"""
 Eres un clasificador de intenciones. Analiza la petición del usuario y determina si es una conversación normal o un comando para cambiar una configuración del bot.
 Las intenciones posibles son:
@@ -253,7 +251,6 @@ class ModularBot:
         # Si la opción de sintetizar en está sesión está activada...
         if session.get("responder_con_audio", True):
             
-            # --- CAMBIO CLAVE ---
             # Obtenemos la voz guardada en la sesión del usuario
             current_voice = session.get("tts_voice", SpeechService.DEFAULT_VOICE)
             
@@ -379,7 +376,6 @@ class ModularBot:
                 self.bot.reply_to(msg, "⚠️ No pude analizar la imagen.")
 
     def run(self):
-        # ... (el método run se mantiene exactamente igual) ...
         print("✅ Bot iniciado correctamente.")
         import time
         while True:
@@ -388,4 +384,5 @@ class ModularBot:
             except Exception as e:
                 print(f"[ERROR GENERAL] {e}")
                 print("Reiniciando en 5 segundos...")
+
                 time.sleep(5)
