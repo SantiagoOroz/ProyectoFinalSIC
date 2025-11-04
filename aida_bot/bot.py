@@ -138,7 +138,7 @@ class ModularBot:
             # 4.1. Analizar el sentimiento
             sentimiento = self.sentiment.analyze(chat_content)
             
-            # 4.2. Formatear y ENVIAR el mensaje de feedback (¡NUEVO!)
+            # 4.2. Formatear y ENVIAR el mensaje de feedback 
             sentiment_feedback = self.sentiment.format_analysis(sentimiento)
             if sentiment_feedback:
                 # Enviamos esto como un mensaje separado
