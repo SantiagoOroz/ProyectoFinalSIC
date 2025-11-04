@@ -1,0 +1,17 @@
+{
+    "sessions": {
+        "8377401401": {
+            "greeted": true,
+            "context": [],
+            "responder_con_audio": false,
+            "tts_voice": "es-AR-TomasNeural"
+        }
+    },
+    "profiles": {
+        "8377401401": {
+            "autonomia": "A",
+            "foco": "D",
+            "entorno": "A"
+        }
+    }
+}

@@ -1,7 +1,13 @@
+# aida_bot/services/speech_service.py
+import requests
 import whisper
 import torch
 import os
 from tempfile import NamedTemporaryFile
+import re
+import json
+
+# texto-a-voz
 import asyncio
 import edge_tts
 from pydub import AudioSegment
@@ -26,15 +32,21 @@ class SpeechService:
     }
     
     # Voz por defecto para nuevos usuarios
-    DEFAULT_VOICE = VOICES["Elena (Argentina)"]
+    DEFAULT_VOICE = VOICES["Elena (Argentina)"] # "es-AR-ElenaNeural"
 
     def __init__(self, model_size="base"):
+        """
+        Carga el modelo Whisper al iniciar.
+        """
         print(f"Cargando el modelo Whisper '{model_size}'...")
         self.model = whisper.load_model(model_size)
         self.language = "es" # Idioma para transcripción
+        print("✅ Modelo Whisper cargado.")
     
     def transcribe(self, audio_bytes: bytes) -> str:
-        """Transcribe los bytes de un archivo de audio a texto."""
+        """
+        Transcribe los bytes de un archivo de audio a texto, forzando el idioma español.
+        """
         temp_file_path = None
         try:
             with NamedTemporaryFile(suffix=".ogg", delete=False) as temp_file:
@@ -58,9 +70,16 @@ class SpeechService:
 
     
     def synthesize(self, text: str, voice_id: str, output_filename: str = "response_audio") -> str | None:
-        """Sintetiza texto a un archivo de audio .ogg usando el 'voice_id'."""
+        """
+        Sintetiza texto a un archivo de audio .ogg usando edge-tts.
+        Usa el 'voice_id' proporcionado.
+        Retorna el audio que fue almacenado de manera temporal.
+        """
+        
+        text = re.sub(r'\*+', '', text) # Elimina asteriscos (para que no los lea)
         
         async def _async_synthesize():
+            """Función interna asíncrona para manejar la generación de audio."""
             mp3_path = f"{output_filename}.mp3"
             ogg_path = f"{output_filename}.ogg"
             
@@ -80,12 +99,9 @@ class SpeechService:
                     os.remove(mp3_path)
 
         try:
-            # Intenta ejecutar en el loop de eventos existente
             audio_path = asyncio.run(_async_synthesize())
             return audio_path
         except RuntimeError:
-            # Si falla (ej. 'asyncio.run() cannot be called from a running event loop')
-            # crea un nuevo loop.
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             audio_path = loop.run_until_complete(_async_synthesize())

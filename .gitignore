@@ -1,1 +1,21 @@
 .env
+# Credenciales y env
+.env
+file_FF_private.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pytest_cache/
+.venv/
+venv/
+env/
+
+# IDE/OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Node (si existiera)
+node_modules/

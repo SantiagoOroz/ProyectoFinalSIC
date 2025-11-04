@@ -1,107 +1,200 @@
-import json
+# aida_bot/services/nlu_service.py
 import requests
-from groq import Groq
-from langdetect import detect
-from aida_bot import config
-from aida_bot.services.speech_service import SpeechService # Para la lista de voces
+import json
+from .. import config
+from .speech_service import SpeechService
 
 class NLUService:
-    """
-    Procesamiento del lenguaje natural (chat, clasificación, traducción) usando Groq.
-    """
-    def __init__(self, api_key: str, api_url: str, chat_model: str, classifier_model: str):
+    """Procesamiento del lenguaje natural (respuestas inteligentes)."""
+    
+    def __init__(self, api_key: str, api_url: str):
         self.api_key = api_key
         self.api_url = api_url
-        self.chat_model = chat_model
-        self.classifier_model = classifier_model
-        self.client = Groq(api_key=api_key) # Cliente para llamadas multimodales (visión)
+        self.model = config.NLU_MODEL
+        self.classifier_model = config.INTENT_MODEL
         
+        # --- PROMPT DE CONVERSACIÓN ---
+        self.system_prompt = """
+Eres AIDA, un asistente digital paciente, empático y claro, diseñado para enseñar a personas mayores a usar tecnología.
+Tu objetivo es facilitar su vida cotidiana, ayudándolos a entender y usar la tecnología.
+- Explica las cosas paso a paso.
+- Usa ejemplos sencillos y evita tecnicismos.
+- Usa un tono amable y alentador.
+- Si el usuario parece frustrado o confundido (basado en el análisis de sentimiento), sé extra paciente y ofrécele ayuda más simple.
+- Nunca te rindas con el usuario, siempre intenta ayudar.
+"""
+        
+        # --- PROMPT DE CLASIFICADOR MULTI-INTENCIÓN (MEJORADO) ---
         self.intent_system_prompt = f"""
-Eres un clasificador de intenciones. Analiza la petición del usuario y determina la intención.
-Las intenciones posibles son:
-- 'SET_AUDIO_OFF': El usuario quiere dejar de recibir respuestas en audio. (Ej: "deja de mandarme audios", "solo texto")
-- 'SET_AUDIO_ON': El usuario quiere empezar a recibir respuestas en audio. (Ej: "activa la voz", "prefiero escucharte")
-- 'SET_VOICE': El usuario quiere cambiar la voz del asistente. (Ej: "cambia la voz a méxico", "pon la voz de tomás")
-- 'GET_SENTIMENT': El usuario quiere analizar el sentimiento de una frase. (Ej: "/sentimiento estoy muy feliz", "analiza esto: ...")
-- 'TRANSLATE_TEXT': El usuario quiere traducir un texto. (Ej: "traduce 'hola' al inglés", "cómo se dice 'adiós' en francés")
-- 'CHAT': Es una conversación normal, una pregunta, o cualquier otra cosa.
+Eres un clasificador de intenciones experto. Tu trabajo es analizar el mensaje del usuario y descomponerlo en un plan de acción JSON.
+Debes identificar tres cosas:
+1.  **Conversación**: ¿El usuario quiere chatear, hacer una pregunta o dar una orden?
+2.  **Configuración**: ¿El usuario está intentando cambiar una preferencia del bot (audio o voz)?
+3.  **Análisis Emocional**: ¿El usuario está expresando una emoción fuerte (positiva o negativa) que deberíamos analizar?
 
-Si la intención es 'SET_VOICE', identifica la voz de la lista y pon su ID en 'payload'.
-LISTA DE VOCES:
+Tu respuesta DEBE ser un objeto JSON con esta estructura:
+{{
+  "has_chat_intent": true/false,
+  "chat_content": "...", 
+  "configuration": {{
+    "set_audio": "ON" / "OFF" / null,
+    "set_voice": "ID_DE_VOZ" / null
+  }},
+  "analysis_required": {{
+    "sentiment": true/false
+  }}
+}}
+
+--- GUÍA DE ANÁLISIS ---
+
+* **has_chat_intent / chat_content**:
+    * Si el usuario saluda, pregunta algo ("¿qué día es hoy?"), o da una orden ("explícame esto"), `has_chat_intent` es `true`.
+    * `chat_content` debe ser el texto completo de esa conversación.
+    * Si el usuario *solo* cambia una configuración (ej: "solo texto"), `has_chat_intent` es `false` y `chat_content` es `null`.
+
+* **configuration**:
+    * Busca peticiones de audio: "solo texto", "no me mandes audios" -> `set_audio: "OFF"`. "activa la voz" -> `set_audio: "ON"`.
+    * Busca peticiones de voz. Usa la lista de abajo. "voz de hombre" -> "es-AR-TomasNeural". "la mexicana" -> "es-MX-DaliaNeural".
+    * Si un mensaje tiene chat Y configuración (ej: "hola, pon la voz de tomás"), ambas partes del JSON deben estar llenas.
+
+* **analysis_required**:
+    * `sentiment` es `true` si el usuario expresa cómo se siente.
+    * Ejemplos Positivos: "qué alegría", "me encanta", "muchas gracias, me salvaste".
+    * Ejemplos Negativos: "estoy harto", "no entiendo nada", "qué frustrante", "me rindo".
+    * No lo actives para saludos simples como "hola" o preguntas neutrales.
+
+--- LISTA DE VOCES DISPONIBLES (Nombre amigable: ID) ---
 {json.dumps(SpeechService.VOICES, indent=2, ensure_ascii=False)}
 
-Si la intención es 'GET_SENTIMENT', extrae el texto a analizar en 'payload'.
-Ej: "analiza el sentimiento de 'qué mal día'" -> {{"intent": "GET_SENTIMENT", "payload": "qué mal día"}}
+--- EJEMPLOS DE ANÁLISIS ---
 
-Si la intención es 'TRANSLATE_TEXT', extrae el texto y el idioma destino en 'payload'.
-Ej: "traduce 'me gusta' al inglés" -> {{"intent": "TRANSLATE_TEXT", "payload": {{"text": "me gusta", "lang": "inglés"}}}}
+Usuario: "deja de mandarme audios"
+{{
+  "has_chat_intent": false,
+  "chat_content": null,
+  "configuration": {{
+    "set_audio": "OFF",
+    "set_voice": null
+  }},
+  "analysis_required": {{
+    "sentiment": false
+  }}
+}}
 
-Responde ÚNICAMENTE con un objeto JSON válido: {{"intent": "INTENCION", "payload": ...}}
+Usuario: "hola, pon la voz de tomás por favor, estoy medio frustrado con la otra"
+{{
+  "has_chat_intent": true,
+  "chat_content": "hola, pon la voz de tomás por favor, estoy medio frustrado con la otra",
+  "configuration": {{
+    "set_audio": null,
+    "set_voice": "es-AR-TomasNeural"
+  }},
+  "analysis_required": {{
+    "sentiment": true
+  }}
+}}
+
+Usuario: "qué día es hoy?"
+{{
+  "has_chat_intent": true,
+  "chat_content": "qué día es hoy?",
+  "configuration": {{
+    "set_audio": null,
+    "set_voice": null
+  }},
+  "analysis_required": {{
+    "sentiment": false
+  }}
+}}
+
+Usuario: "usa la voz de méxico"
+{{
+  "has_chat_intent": false,
+  "chat_content": null,
+  "configuration": {{
+    "set_audio": null,
+    "set_voice": "es-MX-DaliaNeural"
+  }},
+  "analysis_required": {{
+    "sentiment": false
+  }}
+}}
+
+Usuario: "¡¡No puedo hacer esto!! ¡¡Qué bronca!!"
+{{
+  "has_chat_intent": true,
+  "chat_content": "¡¡No puedo hacer esto!! ¡¡Qué bronca!!",
+  "configuration": {{
+    "set_audio": null,
+    "set_voice": null
+  }},
+  "analysis_required": {{
+    "sentiment": true
+  }}
+}}
 """
 
-    def _call_api(self, model: str, messages: list, is_json: bool = False, timeout: int = 20) -> str:
-        """Función helper para llamar a la API de Groq."""
+    def detect_intent(self, user_text: str) -> dict:
+        """
+        Usa un modelo para clasificar las intenciones del usuario.
+        """
         headers = {
             'Authorization': f'Bearer {self.api_key}',
             'Content-Type': 'application/json'
         }
         data = {
-            "model": model,
-            "messages": messages,
-            "temperature": 0.1 if is_json else 0.7,
+            "model": self.classifier_model,
+            "messages": [
+                {"role": "system", "content": self.intent_system_prompt},
+                {"role": "user", "content": user_text}
+            ],
+            "response_format": {"type": "json_object"},
+            "temperature": 0.0
         }
-        if is_json:
-            data["response_format"] = {"type": "json_object"}
+        
+        # Estructura de fallback en caso de error
+        default_response = {
+            "has_chat_intent": True,
+            "chat_content": user_text,
+            "configuration": {"set_audio": None, "set_voice": None},
+            "analysis_required": {"sentiment": False}
+        }
 
         try:
-            resp = requests.post(self.api_url, headers=headers, json=data, timeout=timeout)
-            resp.raise_for_status() # Lanza error si el status no es 2xx
-            
-            response_data = resp.json()
-            content = response_data['choices'][0]['message']['content']
-            return content.strip()
-            
-        except requests.exceptions.HTTPError as e:
-            print(f"[ERROR NLU HTTP {e.response.status_code}] {e.response.text}")
-            return f"Error IA {e.response.status_code}"
+            resp = requests.post(self.api_url, headers=headers, json=data, timeout=15)
+            if resp.status_code == 200:
+                intent_data = json.loads(resp.json()['choices'][0]['message']['content'])
+                # Validamos que la estructura básica exista
+                if "has_chat_intent" not in intent_data or "configuration" not in intent_data:
+                    return default_response
+                return intent_data
+            else:
+                print(f"[ERROR Intención] Código {resp.status_code}: {resp.text}")
+                return default_response
+        except Exception as e:
+            print(f"[ERROR Intención] {e}")
+            return default_response
+
+
+    def get_response(self, user_text: str) -> str:
+        """Genera una respuesta de chat normal."""
+        headers = {
+            'Authorization': f'Bearer {self.api_key}',
+            'Content-Type': 'application/json'
+        }
+        data = {
+            "model": self.model, 
+            "messages": [
+                {"role": "system", "content": self.system_prompt},
+                {"role": "user", "content": user_text}
+            ]
+        }
+        try:
+            resp = requests.post(self.api_url, headers=headers, json=data, timeout=20)
+            if resp.status_code == 200:
+                respuesta = resp.json()['choices'][0]['message']['content']
+                return respuesta.strip()
+            else:
+                return f" [Error IA {resp.status_code}] No pude generar una respuesta."
         except requests.exceptions.RequestException as e:
-            print(f"[ERROR NLU Conexión] {e}")
-            return "Error de conexión con la IA."
-        except Exception as e:
-            print(f"[ERROR NLU Desconocido] {e}")
-            return "Error desconocido en NLU."
-
-    def detect_intent(self, user_text: str) -> dict:
-        """Usa un modelo para clasificar la intención del usuario."""
-        messages = [
-            {"role": "system", "content": self.intent_system_prompt},
-            {"role": "user", "content": user_text}
-        ]
-        try:
-            response_json_str = self._call_api(self.classifier_model, messages, is_json=True, timeout=10)
-            intent_data = json.loads(response_json_str)
-            
-            if "intent" not in intent_data:
-                return {"intent": "CHAT", "payload": None}
-            return intent_data
-            
-        except Exception as e:
-            print(f"[ERROR Intención JSON] {e}. Respuesta: {response_json_str}")
-            return {"intent": "CHAT", "payload": None} # Fallback
-
-    def get_chat_response(self, user_text: str) -> str:
-        """Obtiene una respuesta de chat normal."""
-        messages = [
-            {"role": "system", "content": config.SYSTEM_PROMPT},
-            {"role": "user", "content": user_text}
-        ]
-        return self._call_api(self.chat_model, messages)
-
-    def translate(self, text: str, target_lang: str) -> str:
-        """Traduce texto usando la IA."""
-        prompt = f"Traduce el siguiente texto al idioma '{target_lang}', responde solo con el texto traducido:\n\n{text}"
-        messages = [
-            {"role": "system", "content": "Eres un traductor profesional."},
-            {"role": "user", "content": prompt}
-        ]
-        return self._call_api(self.chat_model, messages)
+            return f" [Error Conexión Groq] No pude contactar al servicio de IA. ¿Estás conectado a internet? ({e})"

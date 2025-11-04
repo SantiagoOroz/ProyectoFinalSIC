@@ -1,172 +1,214 @@
+# aida_bot/bot.py
 import os
 import time
-import telebot
-from aida_bot.services.speech_service import SpeechService
+from telebot import types 
+from .services.speech_service import SpeechService
+from .features.user_profiles import ProfileOnboarding
 
-class PersistentSessionManager:
+class SessionManager:
     """
-    Maneja sesiones de usuario (estado, configuración) usando Firestore
-    para persistencia.
+    Manejo de sesiones de usuario (estado, configuración, contexto).
+    Usa un cliente de almacenamiento para persistir los datos.
     """
-    def __init__(self, db_client):
-        self.db = db_client
-        self.sessions_collection = self.db.collection("user_sessions")
-        self.DEFAULT_SESSION = {
-            "greeted": False,
-            "context": [],
-            "responder_con_audio": True,
-            "tts_voice": SpeechService.DEFAULT_VOICE,
-            "form_step": None, # Para el formulario de perfiles
-            "form_data": {}    # Para el formulario de perfiles
-        }
+    def __init__(self, storage_client):
+        self.storage = storage_client
+        self.local_cache = {} 
 
-    def get(self, chat_id: int) -> dict:
-        """Obtiene la sesión de un usuario. Si no existe, la crea."""
-        session_doc = self.sessions_collection.document(str(chat_id)).get()
-        if session_doc.exists:
-            # Combina los valores por defecto con los guardados
-            session_data = self.DEFAULT_SESSION.copy()
-            session_data.update(session_doc.to_dict())
-            return session_data
-        else:
-            # Crea y guarda la sesión por defecto
-            self.sessions_collection.document(str(chat_id)).set(self.DEFAULT_SESSION)
-            return self.DEFAULT_SESSION.copy()
+    def ensure(self, chat_id: int) -> dict:
+        """
+        Asegura que una sesión exista, cargándola desde el almacenamiento
+        o creando una nueva con valores por defecto.
+        """
+        if chat_id in self.local_cache:
+            return self.local_cache[chat_id]
+        
+        session_data = self.storage.get_session(chat_id)
+        
+        if not session_data:
+            session_data = {
+                "greeted": False, 
+                "context": [],
+                "responder_con_audio": True,
+                "tts_voice": SpeechService.DEFAULT_VOICE
+            }
+            self.storage.save_session(chat_id, session_data)
+        
+        self.local_cache[chat_id] = session_data
+        return session_data
 
-    def update(self, chat_id: int, session_data: dict):
-        """Actualiza la sesión de un usuario en la base de datos."""
-        try:
-            self.sessions_collection.document(str(chat_id)).set(session_data, merge=True)
-        except Exception as e:
-            print(f"[ERROR SessionManager] No se pudo guardar la sesión {chat_id}: {e}")
+    def save(self, chat_id: int, session_data: dict):
+        """Guarda la sesión en el almacenamiento y actualiza la caché."""
+        self.storage.save_session(chat_id, session_data)
+        self.local_cache[chat_id] = session_data
+
 
 class ModularBot:
-    """
-    El orquestador principal del bot. Conecta los handlers de Telegram
-    con los diferentes servicios (NLU, Speech, Vision, etc.).
-    """
-    def __init__(self, bot_instance, nlu, speech, vision, sentiment, sessions, profile_form):
+    """Plantilla general del bot orientado a objetos."""
+    
+    def __init__(self, bot_instance, nlu, speech, vision, sentiment, sessions, storage_client):
         self.bot = bot_instance
         self.nlu = nlu
         self.speech = speech
         self.vision = vision
         self.sentiment = sentiment
         self.sessions = sessions
-        self.profile_form = profile_form # El gestor del formulario /start
+        self.storage = storage_client
+        
+        # Inicializa el manejador del formulario de bienvenida
+        self.onboarding = ProfileOnboarding(bot_instance, storage_client)
+        
         self._setup_handlers()
+        print("✅ Bot modular listo y handlers configurados.")
 
     def _send_response(self, msg, response_text: str):
         """
         Método centralizado para enviar respuestas.
-        Envía texto y, si el usuario lo tiene activado, también el audio.
+        Primero envía el texto y luego, si está activado, el audio
+        CON LA VOZ SELECCIONADA POR EL USUARIO.
         """
-        # 1. Enviar siempre la respuesta como texto
-        try:
-            self.bot.reply_to(msg, response_text, parse_mode="Markdown")
-        except Exception:
-             self.bot.reply_to(msg, response_text) # Fallback sin Markdown
-
-        # 2. Leer la configuración de la sesión (ya debe existir por el 'ensure')
-        session = self.sessions.get(msg.chat.id)
-
-        # 3. Si la síntesis de voz está activada, enviar audio
+        self.bot.reply_to(msg, response_text)
+        
+        session = self.sessions.ensure(msg.chat.id)
+        
         if session.get("responder_con_audio", True):
             current_voice = session.get("tts_voice", SpeechService.DEFAULT_VOICE)
             self.bot.send_chat_action(msg.chat.id, "record_voice")
-            
             audio_path = self.speech.synthesize(response_text, current_voice)
             
             if audio_path:
                 try:
                     with open(audio_path, 'rb') as audio_file:
                         self.bot.send_voice(msg.chat.id, audio_file)
-                except Exception as e:
-                    print(f"[ERROR TTS Send] {e}")
                 finally:
-                    os.remove(audio_path) # Borrar archivo temporal
+                    if os.path.exists(audio_path):
+                        os.remove(audio_path)
 
     def _process_user_message(self, msg, user_text: str):
         """
-        Procesa el texto del usuario, detecta la intención y actúa.
+        Procesa el texto del usuario, detectando *múltiples* intenciones 
+        y ejecutando un plan de acción.
         """
-        session = self.sessions.get(msg.chat.id)
+        session = self.sessions.ensure(msg.chat.id)
         
-        # 1. Detectar intención (¿es un comando o un chat?)
+        # 1. Detectar todas las intenciones
         intent_data = self.nlu.detect_intent(user_text)
-        intent = intent_data.get("intent", "CHAT")
-        payload = intent_data.get("payload")
-
-        response_text = ""
-        update_session = False
-
-        # 2. Actuar según la intención
-        if intent == "SET_AUDIO_OFF":
-            session["responder_con_audio"] = False
-            response_text = "Entendido. A partir de ahora, solo te responderé con texto. 👍"
-            update_session = True
         
-        elif intent == "SET_AUDIO_ON":
-            session["responder_con_audio"] = True
-            response_text = "¡Hecho! Volveré a enviarte las respuestas en audio además del texto. 🔊"
-            update_session = True
+        config_actions = intent_data.get("configuration", {})
+        analysis_actions = intent_data.get("analysis_required", {})
+        has_chat = intent_data.get("has_chat_intent", True)
+        chat_content = intent_data.get("chat_content", user_text if has_chat else "")
 
-        elif intent == "SET_VOICE":
-            if payload and payload in self.speech.VOICES.values():
-                session["tts_voice"] = payload
-                friendly_name = next((name for name, id_ in self.speech.VOICES.items() if id_ == payload), "desconocida")
-                response_text = f"¡Perfecto! He cambiado mi voz a {friendly_name}. 🎤"
-                update_session = True
+        # 2. Ejecutar acciones de configuración (siempre primero)
+        config_responses = [] 
+
+        if config_actions.get("set_audio") == "OFF":
+            if session["responder_con_audio"]: 
+                session["responder_con_audio"] = False
+                self.sessions.save(msg.chat.id, session)
+                config_responses.append("Entendido. A partir de ahora, solo te responderé con texto. 👍")
+
+        elif config_actions.get("set_audio") == "ON":
+            if not session["responder_con_audio"]: 
+                session["responder_con_audio"] = True
+                self.sessions.save(msg.chat.id, session)
+                config_responses.append("¡Hecho! Volveré a enviarte las respuestas en audio además del texto. 🔊")
+
+        if config_actions.get("set_voice"):
+            voice_id = config_actions["set_voice"]
+            if voice_id in self.speech.VOICES.values():
+                if session["tts_voice"] != voice_id: 
+                    session["tts_voice"] = voice_id
+                    self.sessions.save(msg.chat.id, session)
+                    friendly_name = next((name for name, id_ in self.speech.VOICES.items() if id_ == voice_id), "desconocida")
+                    config_responses.append(f"¡Perfecto! He cambiado mi voz a {friendly_name}. 🎤")
             else:
-                response_text = f"Hmm, no pude reconocer esa voz. Intenta de nuevo (ej: 'usa la voz de México')."
+                config_responses.append(f"Hmm, no pude reconocer la voz '{voice_id}'.")
 
-        elif intent == "GET_SENTIMENT":
-            if not payload: # Si no escribió texto junto al comando
-                payload = "..."
-            sentiment_result = self.sentiment.analyze(payload)
-            response_text = f"Análisis de: *\"{payload}\"*\n\n{sentiment_result}"
+        # 3. Enviar respuestas de configuración (si las hubo)
+        for response in config_responses:
+            self._send_response(msg, response)
 
-        elif intent == "TRANSLATE_TEXT":
-            if payload and payload.get("text") and payload.get("lang"):
-                text_to_translate = payload['text']
-                target_lang = payload['lang']
-                translated_text = self.nlu.translate(text_to_translate, target_lang)
-                response_text = f"Traducción a *{target_lang}*:\n\n{translated_text}"
-            else:
-                response_text = "No entendí qué texto traducir o a qué idioma."
-
-        elif intent == "CHAT":
+        # 4. Ejecutar análisis y chat (si aplica)
+        prompt_adicional = ""
+        
+        # Si el NLU pide análisis de sentimiento
+        if analysis_actions.get("sentiment") and chat_content:
             self.bot.send_chat_action(msg.chat.id, "typing")
-            response_text = self.nlu.get_chat_response(user_text)
+            
+            # 4.1. Analizar el sentimiento
+            sentimiento = self.sentiment.analyze(chat_content)
+            
+            # 4.2. Formatear y ENVIAR el mensaje de feedback (¡NUEVO!)
+            sentiment_feedback = self.sentiment.format_analysis(sentimiento)
+            if sentiment_feedback:
+                # Enviamos esto como un mensaje separado
+                self.bot.send_message(msg.chat.id, sentiment_feedback)
+            
+            # 4.3. Preparar el prompt adicional para el LLM
+            if sentimiento['label'] == 'NEG' and sentimiento['score'] > 0.6:
+                prompt_adicional = " (El usuario parece frustrado o enojado. Responde con extra paciencia y empatía)."
+            elif sentimiento['label'] == 'POS' and sentimiento['score'] > 0.8:
+                prompt_adicional = " (El usuario parece feliz o agradecido. Responde con calidez)."
 
-        else:
-            response_text = "No entendí esa intención."
-
-        # 3. Guardar la sesión si hubo cambios
-        if update_session:
-            self.sessions.update(msg.chat.id, session)
-
-        # 4. Enviar la respuesta
-        if response_text:
+        # 5. Ejecutar el chat (si aplica)
+        if has_chat and chat_content:
+            self.bot.send_chat_action(msg.chat.id, "typing")
+            
+            final_prompt = f"{chat_content}{prompt_adicional}"
+            response_text = self.nlu.get_response(final_prompt)
             self._send_response(msg, response_text)
 
-    def _setup_handlers(self):
-        """
-        Configura los handlers para mensajes de texto, voz y foto.
-        /start y los comandos de perfil son manejados por PerfilFormulario.
-        """
 
-        @self.bot.message_handler(content_types=["text"], func=lambda msg: not msg.text.startswith('/'))
-        def handle_text(msg):
-            """Maneja mensajes de texto que NO son comandos."""
-            session = self.sessions.get(msg.chat.id)
+    def _setup_handlers(self):
+        
+        @self.bot.message_handler(commands=["start"])
+        def handle_start(msg):
+            user_id = msg.from_user.id
+            profile = self.storage.get_profile(user_id)
             
-            # Comprueba si el usuario está en medio de un formulario
-            if self.profile_form.is_user_in_form(session):
-                # Si está en un formulario, delega el mensaje al gestor de formularios
-                self.profile_form.handle_form_message(msg, session)
+            if profile is not None: 
+                markup = types.InlineKeyboardMarkup()
+                markup.add(types.InlineKeyboardButton("Actualizar mis preferencias", callback_data="start_onboarding_retry"))
+                
+                self.bot.reply_to(
+                    msg, 
+                    "¡Hola de nuevo! Ya te conozco. 😊 ¿En qué te puedo ayudar hoy?",
+                    reply_markup=markup
+                )
             else:
-                # Si no está en un formulario, procesa como chat normal
-                self._process_user_message(msg, msg.text)
+                self.onboarding.start_onboarding(msg, force_retry=True)
+
+        @self.bot.callback_query_handler(func=lambda query: True)
+        def handle_callback_query(query):
+            """Maneja todos los clics de botones en el bot."""
+            
+            # Si es un botón del formulario
+            if query.data.startswith("onboarding_"):
+                self.onboarding.handle_callback(query)
+                return
+            
+            # Si es el botón de repetir el formulario
+            if query.data == "start_onboarding_retry":
+                self.bot.answer_callback_query(query.id, "Entendido, empecemos de nuevo.")
+                try:
+                    # Quitamos los botones del mensaje anterior
+                    self.bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id, reply_markup=None)
+                except Exception:
+                    pass 
+                
+                # Forzamos el reinicio del formulario
+                self.onboarding.start_onboarding(query.message, force_retry=True)
+                return
+
+            self.bot.answer_callback_query(query.id, "Callback desconocido")
+
+        @self.bot.message_handler(content_types=["text"])
+        def handle_text(msg):
+            if msg.text.startswith('/'):
+                return # Ignorar comandos
+            
+            self._process_user_message(msg, msg.text)
+
 
         @self.bot.message_handler(content_types=["voice"])
         def handle_voice(msg):
@@ -179,51 +221,39 @@ class ModularBot:
                 
                 if transcribed_text:
                     self.bot.reply_to(msg, f"🎤 Entendido: *\"{transcribed_text}\"*", parse_mode="Markdown")
-                    self.bot.send_chat_action(msg.chat.id, "typing")
-                    # Procesa el texto transcrito
                     self._process_user_message(msg, transcribed_text)
                 else:
-                    self._send_response(msg, "⚠️ No pude entender lo que dijiste en el audio.")
+                    response_text = "⚠️ No pude entender lo que dijiste en el audio."
+                    self._send_response(msg, response_text)
             except Exception as e:
                 print(f"[ERROR VOZ] {e}")
-                self._send_response(msg, "⚠️ Hubo un error al procesar tu audio.")
+                self.bot.reply_to(msg, "⚠️ Ocurrió un error al procesar tu audio.")
 
         @self.bot.message_handler(content_types=["photo"])
         def handle_photo(msg):
-            self.bot.send_chat_action(msg.chat.id, "typing")
+            self.bot.send_chat_action(msg.chat.id, "upload_photo")
             try:
                 file_id = msg.photo[-1].file_id
                 file_info = self.bot.get_file(file_id)
                 image_bytes = self.bot.download_file(file_info.file_path)
-                caption = msg.caption or ""
                 
-                # Usar el servicio de visión para analizar la imagen
-                analysis_text = self.vision.analyze_image(image_bytes, caption, str(msg.chat.id))
+                self.bot.send_chat_action(msg.chat.id, "typing")
                 
-                # Crear un prompt para la NLU basado en el análisis
-                prompt = f"""
-El usuario me envió una imagen. Mi análisis de la imagen dice:
-'{analysis_text}'
-
-El texto que el usuario escribió junto a la imagen (caption) es:
-'{caption}'
-
-Por favor, genera una respuesta amable y útil basada en AMBAS cosas.
-"""
-                response_text = self.nlu.get_chat_response(prompt)
-                self._send_response(msg, response_text)
+                # Pasamos la imagen y el texto (caption) si existe
+                description = self.vision.analyze_image(image_bytes, msg.caption)
+                
+                self._send_response(msg, description)
                 
             except Exception as e:
                 print(f"[ERROR IMAGEN] {e}")
-                self._send_response(msg, "⚠️ Hubo un error al analizar la imagen.")
+                self.bot.reply_to(msg, "⚠️ Ocurrió un error al analizar la imagen.")
 
     def run(self):
-        """Inicia el bot y lo mantiene corriendo."""
-        print("✅ Bot (ModularBot) configurado. Iniciando polling...")
+        print("✅ Bot iniciado. Escuchando mensajes...")
         while True:
             try:
                 self.bot.polling(none_stop=True)
             except Exception as e:
                 print(f"[ERROR GENERAL POLLING] {e}")
-                print("Reiniciando en 5 segundos...")
-                time.sleep(5)
+                print("Reiniciando en 10 segundos...")
+                time.sleep(10)
