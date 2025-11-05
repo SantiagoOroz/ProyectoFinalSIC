@@ -6,6 +6,7 @@ from aida_bot.services.nlu_service import NLUService
 from aida_bot.services.speech_service import SpeechService
 from aida_bot.services.vision_service import VisionService
 from aida_bot.services.sentiment_service import SentimentAnalyzer
+from aida_bot.services.translator_service import Translator
 from aida_bot.bot import ModularBot, SessionManager
 
 def main():
@@ -35,6 +36,10 @@ def main():
     
     sentiment = SentimentAnalyzer()
 
+    translator = Translator(
+        api_key=config.GROQ_API_KEY
+    )
+
     # 5. Instancia principal del Bot
     # Le pasamos todas las dependencias
     aida_bot = ModularBot(
@@ -43,6 +48,7 @@ def main():
         speech=speech,
         vision=vision,
         sentiment=sentiment,
+        translator=translator,
         sessions=sessions,
         storage_client=storage # Le pasamos el cliente de storage
     )
