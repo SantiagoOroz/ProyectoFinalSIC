@@ -7,10 +7,14 @@ import time
 class SentimentAnalyzer:
     """Analiza el sentimiento de un texto usando transformers."""
     
-    def __init__(self, model_name="pysentimiento/robertuito-sentiment-analysis", alert_file_path="aida_bot/features/feel_list.json"):
+    def __init__(self, model_name="pysentimiento/robertuito-sentiment-analysis"):
         print("🔄 Cargando modelo de análisis de sentimiento...")
         self.analyzer = pipeline("sentiment-analysis", model=model_name)
         print("✅ Modelo de sentimiento cargado.")
+
+        # Construye una ruta absoluta al archivo feel_list.json
+        current_dir = os.path.dirname(__file__) # Directorio 'services'
+        alert_file_path = os.path.join(current_dir, '..', 'features', 'feel_list.json')
         self.alert_words = self._load_alert_words(alert_file_path)
         
         # Mapeo de etiquetas a un español más amigable
