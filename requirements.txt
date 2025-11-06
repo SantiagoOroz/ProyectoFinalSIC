@@ -12,7 +12,7 @@ pysentimiento==0.6.2
 edge_tts==7.2.3
 openai_whisper==20250625
 pydub==0.25.1
-torch==2.8.0
+torch==1.13.1
 
 # === BASE DE DATOS (Opcional) ===
 firebase-admin==6.5.0
