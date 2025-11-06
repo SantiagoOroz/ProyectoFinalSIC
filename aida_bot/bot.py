@@ -4,6 +4,10 @@ import time
 from telebot import types 
 from .services.speech_service import SpeechService
 from .features.user_profiles import ProfileOnboarding
+import json
+from aida_bot import config
+import re
+import difflib
 
 class SessionManager:
     """
@@ -54,12 +58,56 @@ class ModularBot:
         self.sessions = sessions
         self.storage = storage_client
         self.translator = translator
-        
+
+        self._load_dataset()
         # Inicializa el manejador del formulario de bienvenida
         self.onboarding = ProfileOnboarding(bot_instance, storage_client)
         
         self._setup_handlers()
         print("✅ Bot modular listo y handlers configurados.")
+    
+    def _load_dataset(self):
+        """Carga el conjunto de datos de respuestas predefinidas desde un archivo JSON."""
+        self.dataset = {}
+        try:
+            # Construye una ruta absoluta al archivo dataset.json
+            # __file__ es la ubicación de este archivo (bot.py)
+            # os.path.dirname() obtiene el directorio (aida_bot)
+            # os.path.join() une el directorio con el nombre del archivo
+            current_dir = os.path.dirname(__file__)
+            dataset_path = os.path.join(current_dir, 'dataset.json')
+
+            with open(dataset_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                # Convertimos la lista de JSON a un diccionario para búsqueda rápida
+                for item in data:
+                    normalized_question = re.sub(r'[^\w\s]', '', item['question']).lower().strip()
+                    self.dataset[normalized_question] = item['answer']
+            print(f"✅ Dataset cargado correctamente desde '{dataset_path}'.")
+        except FileNotFoundError:
+            print(f"⚠️ Advertencia: No se encontró el archivo de dataset en '{dataset_path}'. El bot funcionará sin respuestas predefinidas.")
+        except json.JSONDecodeError:
+            print(f"❌ Error: El archivo de dataset en '{dataset_path}' no es un JSON válido.")
+
+    def _find_similar_question(self, user_question: str, threshold: float = 0.65) -> str | None:
+        """
+        Busca una pregunta similar en el dataset usando el coeficiente de similitud.
+        Retorna la respuesta correspondiente si encuentra una pregunta con una similitud
+        superior al umbral definido.
+        """
+        if not self.dataset:
+            return None
+
+        best_match_score = 0.0
+        best_match_answer = None
+
+        for question, answer in self.dataset.items():
+            similarity = difflib.SequenceMatcher(None, user_question, question).ratio()
+            if similarity > best_match_score:
+                best_match_score = similarity
+                best_match_answer = answer
+
+        return best_match_answer if best_match_score >= threshold else None
 
     def _send_response(self, msg, response_text: str):
         """
@@ -155,8 +203,17 @@ class ModularBot:
         if has_chat and chat_content:
             self.bot.send_chat_action(msg.chat.id, "typing")
             
-            final_prompt = f"{chat_content}{prompt_adicional}"
-            response_text = self.nlu.get_response(final_prompt)
+            # Normalizar el texto del usuario para la búsqueda en el dataset
+            normalized_text = re.sub(r'[^\w\s]', '', chat_content).lower().strip()
+
+            # 5.1. Buscar respuesta exacta o similar en el dataset local primero
+            response_text = self._find_similar_question(normalized_text, threshold=0.75)
+
+            # 5.2. Si no se encuentra, usar el NLU
+            if response_text is None:
+                final_prompt = f"{chat_content}{prompt_adicional}"
+                response_text = self.nlu.get_response(final_prompt)
+            
             self._send_response(msg, response_text)
 
 
