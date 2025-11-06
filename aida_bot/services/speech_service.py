@@ -6,6 +6,7 @@ import os
 from tempfile import NamedTemporaryFile
 import re
 import json
+from langdetect import detect
 
 # texto-a-voz
 import asyncio
@@ -67,6 +68,37 @@ class SpeechService:
         finally:
             if temp_file_path and os.path.exists(temp_file_path):
                 os.remove(temp_file_path)
+    
+    def get_voice_for_text(self, text: str) -> str:
+        """
+        Detecta el idioma del texto y devuelve la voz adecuada.
+        Si no puede detectar, usa español (Argentina) por defecto.
+        """
+        try:
+            lang = detect(text)
+        except Exception:
+            lang = "es"
+        
+        # Asignar voz según idioma detectado
+        if lang.startswith("es"):
+            return self.VOICES["Elena (Argentina)"]
+        elif lang.startswith("en"):
+            return self.VOICES["Andrew (EEUU)"]
+        elif lang.startswith("pt"):
+            return self.VOICES["Francisca (Brasil)"]
+        elif lang.startswith("fr"):
+            return self.VOICES["Denise (Francia)"]
+        elif lang.startswith("de"):
+            return self.VOICES["Killian (Alemania)"]
+        elif lang.startswith("it"):
+            return self.VOICES["Elsa (Italia)"]
+        elif lang.startswith("ja"):
+            return self.VOICES["Nanami (Japón)"]
+        elif lang.startswith("zh"):
+            return self.VOICES["Xiaoxiao (China)"]
+        else:
+            return self.DEFAULT_VOICE
+
 
     
     def synthesize(self, text: str, voice_id: str, output_filename: str = "response_audio") -> str | None:
