@@ -5,6 +5,12 @@
             "context": [],
             "responder_con_audio": false,
             "tts_voice": "es-AR-TomasNeural"
+        },
+        "5371761540": {
+            "greeted": false,
+            "context": [],
+            "responder_con_audio": true,
+            "tts_voice": "es-AR-ElenaNeural"
         }
     },
     "profiles": {

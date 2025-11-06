@@ -45,7 +45,7 @@ class SessionManager:
 class ModularBot:
     """Plantilla general del bot orientado a objetos."""
     
-    def __init__(self, bot_instance, nlu, speech, vision, sentiment, sessions, storage_client):
+    def __init__(self, bot_instance, nlu, speech, vision, sentiment, sessions, storage_client, translator):
         self.bot = bot_instance
         self.nlu = nlu
         self.speech = speech
@@ -53,6 +53,7 @@ class ModularBot:
         self.sentiment = sentiment
         self.sessions = sessions
         self.storage = storage_client
+        self.translator = translator
         
         # Inicializa el manejador del formulario de bienvenida
         self.onboarding = ProfileOnboarding(bot_instance, storage_client)
@@ -66,7 +67,7 @@ class ModularBot:
         Primero envía el texto y luego, si está activado, el audio
         CON LA VOZ SELECCIONADA POR EL USUARIO.
         """
-        self.bot.reply_to(msg, response_text)
+        self.bot.reply_to(msg, response_text, parse_mode="Markdown")
         
         session = self.sessions.ensure(msg.chat.id)
         

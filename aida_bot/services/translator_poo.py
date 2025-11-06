@@ -1,5 +1,5 @@
 import requests
-from langdetect import detect
+from langdetect import detect, LangDetectException
 
 
 class DatasetTranslator:
@@ -12,7 +12,7 @@ class DatasetTranslator:
              "Eres un traductor profesional especializado en educación digital y comunicación inclusiva. "
             "Tu tarea es traducir contenido educativo y de asistencia tecnológica para personas mayores, "
             "manteniendo un tono amable, claro y fácil de entender. Evita tecnicismos innecesarios y conserva "
-            "el significado educativo y el contexto original del texto."
+            "el significado educativo y el contexto original del texto. Cada vez que se te indique que cambies el idioma hazlo, hasta tener una nueva indicación de idioma"
         )
 
     def detect_language(self, text: str) -> str:
