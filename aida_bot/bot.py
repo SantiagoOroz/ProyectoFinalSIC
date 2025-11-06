@@ -120,11 +120,15 @@ class ModularBot:
         session = self.sessions.ensure(msg.chat.id)
         
         if session.get("responder_con_audio", True):
-            # Si el usuario ya tiene una voz guardada, usarla; sino, detectar idioma automáticamente
-            if session.get("tts_voice"):
-                current_voice = session["tts_voice"]
-            else:
-                current_voice = self.speech.get_voice_for_text(response_text)
+            # Lógica de voz corregida:
+            # 1. Intentar detectar la voz automáticamente según el idioma de la RESPUESTA.
+            current_voice = self.speech.get_voice_for_text(response_text)
+            
+            # 2. Si no se pudo determinar una voz (porque el idioma no es soportado),
+            #    usar la voz guardada por el usuario como fallback.
+            if not current_voice:
+                current_voice = session.get("tts_voice", SpeechService.DEFAULT_VOICE)
+
             self.bot.send_chat_action(msg.chat.id, "record_voice")
             audio_path = self.speech.synthesize(response_text, current_voice)
             
