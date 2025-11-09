@@ -8,6 +8,9 @@ import json
 from aida_bot import config
 import re
 import difflib
+from aida_bot.features.user_profiles import ProfileOnboarding
+from aida_bot.memory import ensure_profile, save_turn, build_llm_context
+
 
 class SessionManager:
     """
@@ -61,7 +64,7 @@ class ModularBot:
 
         self._load_dataset()
         # Inicializa el manejador del formulario de bienvenida
-        self.onboarding = ProfileOnboarding(bot_instance, storage_client)
+        self.onboarding = ProfileOnboarding(bot_instance=self.bot, storage_client=self.storage)
         
         self._setup_handlers()
         print("✅ Bot modular listo y handlers configurados.")
@@ -220,7 +223,11 @@ class ModularBot:
             # 5.2. Si no se encuentra, usar el NLU
             if response_text is None:
                 final_prompt = f"{chat_content}{prompt_adicional}"
-                response_text = self.nlu.get_response(final_prompt)
+                response_text = self.nlu.get_response(
+                    final_prompt,
+                    user_id=msg.chat.id,
+                    user_name=getattr(msg.from_user, "first_name", "") or getattr(msg.chat, "first_name", "")
+                    )
             
             self._send_response(msg, response_text)
 
@@ -229,20 +236,22 @@ class ModularBot:
         
         @self.bot.message_handler(commands=["start"])
         def handle_start(msg):
-            user_id = msg.from_user.id
-            profile = self.storage.get_profile(user_id)
-            
-            if profile is not None: 
+            uid = msg.chat.id
+            profile = self.storage.get_profile(uid) or {}
+            required = ("autonomia", "foco", "entorno")
+            missing = any(k not in profile or not profile[k] for k in required)
+
+            if missing:
+                # Lanzar formulario de onboarding
+                self.onboarding.start_onboarding(msg, force_retry=True)
+            else:
                 markup = types.InlineKeyboardMarkup()
                 markup.add(types.InlineKeyboardButton("Actualizar mis preferencias", callback_data="start_onboarding_retry"))
-                
                 self.bot.reply_to(
-                    msg, 
+                    msg,
                     "¡Hola de nuevo! Ya te conozco. 😊 ¿En qué te puedo ayudar hoy?",
                     reply_markup=markup
                 )
-            else:
-                self.onboarding.start_onboarding(msg, force_retry=True)
 
         @self.bot.callback_query_handler(func=lambda query: True)
         def handle_callback_query(query):
@@ -271,10 +280,20 @@ class ModularBot:
         @self.bot.message_handler(content_types=["text"])
         def handle_text(msg):
             if msg.text.startswith('/'):
-                return # Ignorar comandos
-            
-            self._process_user_message(msg, msg.text)
+                return  # ignorar comandos
 
+            uid = msg.chat.id
+            profile = self.storage.get_profile(uid) or {}
+            required = ("autonomia", "foco", "entorno")
+            missing = any(k not in profile or not profile[k] for k in required)
+
+            if missing:
+                # Pide el formulario y NO sigue al NLU
+                self.onboarding.start_onboarding(msg, force_retry=False)
+                return
+
+            # Perfil OK → sigue el flujo normal
+            self._process_user_message(msg, msg.text)
 
         @self.bot.message_handler(content_types=["voice"])
         def handle_voice(msg):

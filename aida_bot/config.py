@@ -1,35 +1,52 @@
 # aida_bot/config.py
+from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-# Carga el archivo .env
+# --- Cargar .env ---
 load_dotenv()
 
-# --- Tokens y APIs Requeridas ---
+# --- Identidad / Namespacing ---
+ENV = os.getenv("ENV", "dev")
+BOT_ID = os.getenv("BOT_ID", "aida_local")
+NAMESPACE = f"{ENV}:{BOT_ID}"
+
+# --- Tokens y APIs ---
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_API_URL = os.getenv("GROQ_API_URL", "https://api.groq.com/openai/v1/chat/completions")
 
-# --- Modelos de IA ---
-NLU_MODEL = "llama-3.3-70b-versatile" # Modelo rápido para chat
-INTENT_MODEL = "llama-3.3-70b-versatile" # Modelo rápido para clasificación
-VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct" # Modelo potente para visión
+# --- Modelos (Groq) ---
+# Nota: llama3-8b-8192 fue deprecado
+NLU_MODEL = os.getenv("NLU_MODEL", "llama-3.1-8b-instant")
+INTENT_MODEL = os.getenv("INTENT_MODEL", NLU_MODEL)
+VISION_MODEL = os.getenv("VISION_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct")
 
-# --- Configuración Opcional de Base de Datos ---
-# Busca el archivo de credenciales de Google
-GOOGLE_CREDENTIALS_PATH = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+# --- Storage ---
+USE_CLOUD_STORAGE = os.getenv("USE_CLOUD_STORAGE", "False").lower() == "true"
 
-# Variable booleana para saber si usamos la nube
-USE_CLOUD_STORAGE = (GOOGLE_CREDENTIALS_PATH and os.path.exists(GOOGLE_CREDENTIALS_PATH))
+# Resolver ruta ABSOLUTA para la credencial de Firebase
+PROJECT_ROOT = Path(__file__).resolve().parents[1]  # carpeta .../ProyectoFinalSIC
+_raw_path = os.getenv("GOOGLE_CREDENTIALS_PATH", "aida_bot/serviceAccountKey.json")
+if os.path.isabs(_raw_path):
+    GOOGLE_CREDENTIALS_PATH = _raw_path
+else:
+    GOOGLE_CREDENTIALS_PATH = str((PROJECT_ROOT / _raw_path).resolve())
 
-# --- Validación de Configuración ---
+# --- Validaciones mínimas ---
 if not TELEGRAM_TOKEN:
     raise ValueError("❌ Falta TELEGRAM_TOKEN en el archivo .env")
 if not GROQ_API_KEY:
     raise ValueError("❌ Falta GROQ_API_KEY en el archivo .env")
 
+# --- Log de arranque claro ---
 print("✅ Configuración cargada.")
 if USE_CLOUD_STORAGE:
-    print(f"☁️ Usando Firebase Cloud Storage (encontrado: {GOOGLE_CREDENTIALS_PATH})")
+    cred_exists = Path(GOOGLE_CREDENTIALS_PATH).exists()
+    if cred_exists:
+        print(f"☁️ Storage: Firebase (credencial: {GOOGLE_CREDENTIALS_PATH})")
+    else:
+        print(f"⚠️ USE_CLOUD_STORAGE=True, pero NO existe la credencial en: {GOOGLE_CREDENTIALS_PATH}")
+        print("   Se usará JSON local si get_storage_client() no encuentra la credencial.")
 else:
-    print("📁 Usando almacenamiento JSON local (no se encontró GOOGLE_APPLICATION_CREDENTIALS).")
+    print("💾 Storage: JSON local (USE_CLOUD_STORAGE=False)")

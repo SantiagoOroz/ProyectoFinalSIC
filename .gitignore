@@ -2,6 +2,7 @@
 # Credenciales y env
 .env
 file_FF_private.json
+C:\AIDA\ProyectoFinalSIC\aida_bot\serviceAccountKey.js
 
 # Python
 __pycache__/

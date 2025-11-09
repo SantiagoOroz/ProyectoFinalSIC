@@ -63,25 +63,23 @@ class JSONStorage(AbstractStorage):
 
 # --- Implementación 2: Almacenamiento en Firebase ---
 
+# --- Implementación 2: Almacenamiento en Firebase ---
+
 class FirebaseStorage(AbstractStorage):
-    """Implementación de almacenamiento usando Google Firebase Firestore."""
+    """Implementación de almacenamiento usando Google Firebase Firestore con estructura organizada."""
     
     def __init__(self):
         cred = credentials.Certificate(config.GOOGLE_CREDENTIALS_PATH)
-        firebase_admin.initialize_app(cred)
+        if not firebase_admin._apps:  # evita error si se inicializa dos veces
+            firebase_admin.initialize_app(cred)
         self.db = firestore.client()
-        self.sessions_col = self.db.collection("bot_sessions")
-        self.profiles_col = self.db.collection("bot_profiles")
 
-    def get_session(self, chat_id: int) -> dict:
-        doc = self.sessions_col.document(str(chat_id)).get()
-        if doc.exists:
-            return doc.to_dict()
-        return {}
+        # Carpeta raíz (podes cambiar el nombre si querés)
+        self.root = self.db.collection("bots").document(f"{config.ENV}:{config.BOT_ID}")
+        self.sessions_col = self.root.collection("mensajes")
+        self.profiles_col = self.root.collection("perfiles")
 
-    def save_session(self, chat_id: int, session_data: dict):
-        self.sessions_col.document(str(chat_id)).set(session_data)
-
+    # ---------- PERFIL (datos persistentes del usuario) ----------
     def get_profile(self, user_id: int) -> dict | None:
         doc = self.profiles_col.document(str(user_id)).get()
         if doc.exists:
@@ -91,14 +89,28 @@ class FirebaseStorage(AbstractStorage):
     def save_profile(self, user_id: int, profile_data: dict):
         self.profiles_col.document(str(user_id)).set(profile_data)
 
+    # ---------- MENSAJES (historial de conversación) ----------
+    def get_session(self, chat_id: int) -> dict:
+        doc = self.sessions_col.document(str(chat_id)).get()
+        if doc.exists:
+            return doc.to_dict()
+        return {}
+
+    def save_session(self, chat_id: int, session_data: dict):
+        self.sessions_col.document(str(chat_id)).set(session_data)
+
+
 # --- Factory (Fábrica) ---
 
 def get_storage_client() -> AbstractStorage:
-    """
-    Devuelve una instancia del cliente de almacenamiento apropiado
-    basado en la configuración del proyecto.
-    """
-    if config.USE_CLOUD_STORAGE:
+    if getattr(config, "USE_CLOUD_STORAGE", False):
+        path = getattr(config, "GOOGLE_CREDENTIALS_PATH", "")
+        if not path or not os.path.exists(path):
+            print(f"💾 Usando almacenamiento local (JSON) (no se encontró GOOGLE_CREDENTIALS_PATH='{path}')")
+            return JSONStorage()
+        print(f"☁️ Usando Firebase Cloud Storage (encontrado: {path})")
         return FirebaseStorage()
     else:
+        print("💾 Usando almacenamiento local (JSON)")
         return JSONStorage()
+
