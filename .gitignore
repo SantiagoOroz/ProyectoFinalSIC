@@ -3,7 +3,8 @@
 .env
 file_FF_private.json
 C:\AIDA\ProyectoFinalSIC\aida_bot\serviceAccountKey.js
-
+aida_bot\serviceAccountKey.js
+aida_bot/*.json
 # Python
 __pycache__/
 *.pyc
