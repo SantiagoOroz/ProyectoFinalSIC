@@ -84,7 +84,7 @@ Usa un tono cálido y paciente.
                     ]
                 }
             ],
-            "max_tokens": 1024
+            "max_tokens": 150
         }
         
         try:

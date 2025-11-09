@@ -18,7 +18,9 @@ class NLUService:
         # --- PROMPT DE CONVERSACIÓN ---
       
         # Ruta del dataset
-        ruta_dataset = Path(r"C:\AIDA\ProyectoFinalSIC\aida_bot\dataset.json")
+        # Construye la ruta al dataset de forma dinámica
+        current_dir = Path(__file__).parent.parent # Sube dos niveles: de 'services' a 'aida_bot'
+        ruta_dataset = current_dir / "dataset.json"
 
         # Cargar el dataset en memoria al iniciar el bot
         with open(ruta_dataset, 'r', encoding='utf-8') as f:
@@ -208,7 +210,8 @@ Usuario: "¡¡No puedo hacer esto!! ¡¡Qué bronca!!"
             "messages": [
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": user_text}
-            ]
+            ],
+            "max_tokens": 150
         }
         try:
             resp = requests.post(self.api_url, headers=headers, json=data, timeout=20)

@@ -18,6 +18,7 @@ VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct" # Modelo potente para
 # --- Configuración Opcional de Base de Datos ---
 # Busca el archivo de credenciales de Google
 GOOGLE_CREDENTIALS_PATH = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+MAKE_WEBHOOK_URL = os.getenv("MAKE_WEBHOOK_URL")
 
 # Variable booleana para saber si usamos la nube
 USE_CLOUD_STORAGE = (GOOGLE_CREDENTIALS_PATH and os.path.exists(GOOGLE_CREDENTIALS_PATH))

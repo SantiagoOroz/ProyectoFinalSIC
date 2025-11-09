@@ -96,10 +96,45 @@ class ProfileOnboarding:
         elif data.startswith("onboarding_entorno_"):
             profile_data["entorno"] = data.split('_')[-1]
             self.storage.save_profile(user_id, profile_data)
-            
-            # Finalizar
+        
+            # Nueva pregunta opcional
             self.bot.send_message(
                 user_id,
-                "✅ ¡Perfil guardado! Muchas gracias. Esto me ayudará a darte respuestas mejor adaptadas a vos.\n\n"
-                "Ahora sí, ¿en qué te puedo ayudar?"
+                "🪪 Antes de terminar, ¿querés contarme tu *nombre y apellido*? (opcional)\n\n"
+                "Si preferís no hacerlo, simplemente escribí 'no'."
             )
+        
+            profile_data["esperando_nombre"] = True
+            self.storage.save_profile(user_id, profile_data)
+        
+    
+
+    def handle_text_response(self, message):
+        """Maneja respuestas escritas del usuario durante el onboarding."""
+        user_id = message.from_user.id
+        text = message.text.strip()
+        profile = self._get_profile_data(user_id)
+    
+        # Si estamos esperando el nombre
+        if profile.get("esperando_nombre"):
+            if text.lower() != "no":
+                profile["nombre_apellido"] = text
+            profile["esperando_nombre"] = False
+            self.storage.save_profile(user_id, profile)
+    
+            # Pasar a la pregunta del correo
+            self.bot.send_message(
+                user_id,
+                "📧 Perfecto. Ahora, ¿podrías darme el correo electrónico de una persona de confianza "
+                "a la que pueda contactar si es necesario? (Ejemplo: nombre@ejemplo.com)"
+            )
+            profile["esperando_contacto"] = True
+            self.storage.save_profile(user_id, profile)
+            return
+    
+        # Si estamos esperando el correo
+        if profile.get("esperando_contacto"):
+            profile["contacto_emergencia"] = text
+            profile["esperando_contacto"] = False
+            self.storage.save_profile(user_id, profile)
+            self.bot.send_message(user_id, "✅ ¡Gracias! Ya tengo todo listo para ayudarte. 😊")

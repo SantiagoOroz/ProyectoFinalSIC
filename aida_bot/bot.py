@@ -49,12 +49,13 @@ class SessionManager:
 class ModularBot:
     """Plantilla general del bot orientado a objetos."""
     
-    def __init__(self, bot_instance, nlu, speech, vision, sentiment, sessions, storage_client, translator):
+    def __init__(self, bot_instance, nlu, speech, vision, sentiment, email_service, sessions, storage_client, translator):
         self.bot = bot_instance
         self.nlu = nlu
         self.speech = speech
         self.vision = vision
         self.sentiment = sentiment
+        self.email_service = email_service
         self.sessions = sessions
         self.storage = storage_client
         self.translator = translator
@@ -244,6 +245,30 @@ class ModularBot:
             else:
                 self.onboarding.start_onboarding(msg, force_retry=True)
 
+        @self.bot.message_handler(func=lambda msg: (self.storage.get_profile(msg.chat.id) or {}).get("esperando_contacto"))
+        def handle_emergency_contact(message):
+            """
+            Handler específico para capturar el email de contacto de emergencia
+            cuando el perfil del usuario lo está esperando.
+            """
+            user_id = message.chat.id
+            profile = self.storage.get_profile(user_id) # Ya sabemos que existe por el filtro del handler
+            email = message.text.strip()
+
+            if "@" in email and "." in email:
+                profile["contacto_emergencia"] = email
+                profile.pop("esperando_contacto", None)
+                self.storage.save_profile(user_id, profile)
+                self.bot.send_message(
+                    user_id,
+                    f"✅ ¡Perfil guardado! Muchas gracias por tu tiempo.\n\n"
+                    f"Guardé el correo de contacto de emergencia: {email}\n\n"
+                    "Ahora sí, ¿en qué te puedo ayudar?"
+                )
+            else:
+                self.bot.send_message(user_id, "⚠️ Ese correo no parece válido. Por favor, escribilo nuevamente.")
+            return
+            
         @self.bot.callback_query_handler(func=lambda query: True)
         def handle_callback_query(query):
             """Maneja todos los clics de botones en el bot."""
@@ -273,8 +298,30 @@ class ModularBot:
             if msg.text.startswith('/'):
                 return # Ignorar comandos
             
-            self._process_user_message(msg, msg.text)
+            #  Guardar la última actividad del usuario
+            user_id = msg.chat.id
+            profile = self.storage.get_profile(user_id) or {}
+            profile["last_active"] = time.time()
+            self.storage.save_profile(user_id, profile)
 
+            # 1. VERIFICAR SI EL USUARIO ESTÁ EN EL FORMULARIO
+            # Si estamos esperando el nombre o el email, delegamos al manejador del formulario.
+            if profile.get("esperando_nombre") or profile.get("esperando_contacto"):
+                self.onboarding.handle_text_response(msg)
+                return # Importante: Detenemos aquí para no procesarlo como un chat normal.
+
+            # 2. SI NO, PROCESAR COMO UN MENSAJE NORMAL
+            user_text = msg.text
+            self._process_user_message(msg, user_text)
+
+            # Verificar si el mensaje contiene palabras de alerta
+            if self.sentiment.check_for_alert(user_text):
+                email_destino = profile.get("contacto_emergencia")
+                if email_destino and self.email_service:
+                    motivo_alerta = "Palabras potencialmente peligrosas detectadas en el chat."
+                    # Re-obtenemos el perfil para asegurarnos de tener los datos más recientes
+                    profile_data = self.storage.get_profile(user_id)
+                    self.email_service.send_alert(email_destino, user_id, motivo_alerta, profile_data)
 
         @self.bot.message_handler(content_types=["voice"])
         def handle_voice(msg):
@@ -282,9 +329,10 @@ class ModularBot:
             try:
                 file_info = self.bot.get_file(msg.voice.file_id)
                 audio_bytes = self.bot.download_file(file_info.file_path)
-                
+
                 transcribed_text = self.speech.transcribe(audio_bytes)
                 
+
                 if transcribed_text:
                     self.bot.reply_to(msg, f"🎤 Entendido: *\"{transcribed_text}\"*", parse_mode="Markdown")
                     self._process_user_message(msg, transcribed_text)
@@ -302,14 +350,15 @@ class ModularBot:
                 file_id = msg.photo[-1].file_id
                 file_info = self.bot.get_file(file_id)
                 image_bytes = self.bot.download_file(file_info.file_path)
-                
                 self.bot.send_chat_action(msg.chat.id, "typing")
                 
+
                 # Pasamos la imagen y el texto (caption) si existe
                 description = self.vision.analyze_image(image_bytes, msg.caption)
-                
+
                 self._send_response(msg, description)
                 
+
             except Exception as e:
                 print(f"[ERROR IMAGEN] {e}")
                 self.bot.reply_to(msg, "⚠️ Ocurrió un error al analizar la imagen.")
