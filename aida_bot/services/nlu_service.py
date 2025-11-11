@@ -22,7 +22,8 @@ class NLUService:
         # --- PROMPT DE CONVERSACIÓN ---
       
         # Ruta del dataset
-      ruta_dataset = Path(r"C:\AIDA\ProyectoFinalSIC\aida_bot\dataset.json")
+      current_dir = Path(__file__).parent.parent # Sube dos niveles: de 'services' a 'aida_bot'
+      ruta_dataset = current_dir / "storage" / "dataset.json"
 
         # Cargar el dataset en memoria al iniciar el bot
       with open(ruta_dataset, 'r', encoding='utf-8') as f:
@@ -271,4 +272,3 @@ Usuario: "¡¡No puedo hacer esto!! ¡¡Qué bronca!!"
     #             return f" [Error IA {resp.status_code}] No pude generar una respuesta."
     #     except requests.exceptions.RequestException as e:
     #         return f" [Error Conexión Groq] No pude contactar al servicio de IA. ¿Estás conectado a internet? ({e})"
-

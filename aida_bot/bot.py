@@ -75,8 +75,12 @@ class ModularBot:
         """Carga el conjunto de datos de respuestas predefinidas desde un archivo JSON."""
         self.dataset = {}
         try:
+            # Construye una ruta absoluta al archivo dataset.json
+            # __file__ es la ubicación de este archivo (bot.py)
+            # os.path.dirname() obtiene el directorio (aida_bot)
+            # os.path.join() une el directorio con el nombre del archivo
             current_dir = os.path.dirname(__file__)
-            dataset_path = os.path.join(current_dir, 'dataset.json')
+            dataset_path = os.path.join(current_dir, 'storage', 'dataset.json')
 
             with open(dataset_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -121,8 +125,12 @@ class ModularBot:
         session = self.sessions.ensure(msg.chat.id)
         
         if session.get("responder_con_audio", True):
+            # Lógica de voz corregida:
+            # 1. Intentar detectar la voz automáticamente según el idioma de la RESPUESTA.
             current_voice = self.speech.get_voice_for_text(response_text)
             
+            # 2. Si no se pudo determinar una voz (porque el idioma no es soportado),
+            #    usar la voz guardada por el usuario como fallback.
             if not current_voice:
                 current_voice = session.get("tts_voice", SpeechService.DEFAULT_VOICE)
 
@@ -189,12 +197,15 @@ class ModularBot:
         if analysis_actions.get("sentiment") and chat_content:
             self.bot.send_chat_action(msg.chat.id, "typing")
             
+            # 4.1. Analizar el sentimiento
             sentimiento = self.sentiment.analyze(chat_content)
             
+            # 4.2. Formatear y ENVIAR el mensaje de feedback 
             sentiment_feedback = self.sentiment.format_analysis(sentimiento)
             if sentiment_feedback:
                 self.bot.send_message(msg.chat.id, sentiment_feedback)
             
+            # 4.3. Preparar el prompt adicional para el LLM
             if sentimiento['label'] == 'NEG' and sentimiento['score'] > 0.6:
                 prompt_adicional = " (El usuario parece frustrado o enojado. Responde con extra paciencia y empatía)."
             elif sentimiento['label'] == 'POS' and sentimiento['score'] > 0.8:
@@ -204,10 +215,13 @@ class ModularBot:
         if has_chat and chat_content:
             self.bot.send_chat_action(msg.chat.id, "typing")
             
+            # Normalizar el texto del usuario para la búsqueda en el dataset
             normalized_text = re.sub(r'[^\w\s]', '', chat_content).lower().strip()
 
+            # 5.1. Buscar respuesta exacta o similar en el dataset local primero
             response_text = self._find_similar_question(normalized_text, threshold=0.75)
 
+            # 5.2. Si no se encuentra, usar el NLU
             if response_text is None:
                 final_prompt = f"{chat_content}{prompt_adicional}"
                 response_text = self.nlu.get_response(
@@ -228,16 +242,22 @@ class ModularBot:
             profile = self.storage.get_profile(user_id)
             
             if profile is not None: 
+                uid = msg.chat.id
+                profile = self.storage.get_profile(uid) or {}
+                required = ("autonomia", "foco", "entorno")
+                missing = any(k not in profile or not profile[k] for k in required)
+
+            if missing:
+                # Lanzar formulario de onboarding
+                self.onboarding.start_onboarding(msg, force_retry=True)
+            else:
                 markup = types.InlineKeyboardMarkup()
                 markup.add(types.InlineKeyboardButton("Actualizar mis preferencias", callback_data="start_onboarding_retry"))
-                
                 self.bot.reply_to(
-                    msg, 
+                    msg,
                     "¡Hola de nuevo! Ya te conozco. 😊 ¿En qué te puedo ayudar hoy?",
                     reply_markup=markup
                 )
-            else:
-                self.onboarding.start_onboarding(msg, force_retry=True)
 
         @self.bot.callback_query_handler(func=lambda query: True)
         def handle_callback_query(query):

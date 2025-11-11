@@ -38,6 +38,7 @@ def main():
     sentiment = SentimentAnalyzer()
 
     email_service = EmailService() # <--- AÑADIR
+    # email_service = EmailService() # <--- MODIFICADO: Comentado para desactivar alertas
 
     translator = Translator(api_key=config.GROQ_API_KEY)
 
