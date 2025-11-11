@@ -1,11 +1,17 @@
+# --- Variables y credenciales ---
 .env
-# Credenciales y env
-.env
-file_FF_private.json
-C:\AIDA\ProyectoFinalSIC\aida_bot\serviceAccountKey.js
-aida_bot\serviceAccountKey.js
+*.env
+*.key
+*.pem
+*.p12
+
+# --- Claves y JSON de servicio ---
+# Firebase / Google Cloud Service Account
+aida_bot/serviceAccountKey.json
 aida_bot/*.json
-# Python
+service-account.json
+
+# --- Archivos de Python ---
 __pycache__/
 *.pyc
 *.pyo
@@ -14,10 +20,11 @@ __pycache__/
 venv/
 env/
 
-# IDE/OS
+# --- Archivos de entorno/IDE/OS ---
 .vscode/
 .DS_Store
 Thumbs.db
 
-# Node (si existiera)
+# --- Node (por si el proyecto crece) ---
 node_modules/
+aida_bot/serviceAccountKey.json
