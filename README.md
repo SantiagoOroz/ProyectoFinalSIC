@@ -54,7 +54,7 @@ Este bot no es solo un chat, sino un sistema de asistencia integral que incluye:
 | **NLU y Visión** | `groq` | Inferencia de alta velocidad para Llama 3 (NLU) y Llama 4 (Visión). |
 | **Voz a Texto** | `openai-whisper` | Transcripción de mensajes de voz. |
 | **Texto a Voz** | `edge_tts` | Síntesis de voz natural y multi-idioma. |
-| **Sentimiento** | `pysentimiento` | Análisis de sentimiento en español. |
+| **Sentimiento** | `pysentimiento` | Análisis de sentimiento |
 | **Base de Datos** | `firebase-admin` | Almacenamiento en la nube (perfiles y sesiones). |
 | **Configuración** | `python-dotenv` | Carga de variables de entorno (API keys). |
 | **Audio** | `pydub` | Procesamiento y conversión de archivos de audio. |
@@ -174,10 +174,8 @@ El bot comenzará a escuchar mensajes.
 
 Queremos extender nuestro más sincero agradecimiento a las siguientes personas e instituciones por su apoyo y guía invaluable durante el desarrollo de este proyecto:
 
+A todas las personas que hicieron posible la experiencia del curso **Samsung Campus Innovation:** Por su dedicación y por brindarnos esta valiosa oportunidad educativa.
   * **Profesor Alejandro Sosa**: Por su mentoría, paciencia y por brindarnos las herramientas fundamentales para llevar este proyecto a la realidad.
   * **Asociación Conciencia**: Por su dedicación, por facilitarnos el espacio de aprendizaje y por su compromiso con la inclusión digital.
 
 <!-- end list -->
-
-```
-```
