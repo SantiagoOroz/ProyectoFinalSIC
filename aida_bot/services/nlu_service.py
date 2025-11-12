@@ -232,7 +232,8 @@ Usuario: "¡¡No puedo hacer esto!! ¡¡Qué bronca!!"
                 "messages": [
                     {"role": "system", "content": self.system_prompt},
                     {"role": "user", "content": prompt}
-                ]
+                ],
+                "max_tokens": 150 # Añadir este parámetro para limitar la longitud de la respuesta
             }
 
             resp = requests.post(self.api_url, headers=headers, json=data, timeout=20)

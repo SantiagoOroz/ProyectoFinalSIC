@@ -316,6 +316,20 @@ class ModularBot:
                     motivo_alerta = "Palabras potencialmente peligrosas detectadas en el chat."
                     profile_data = self.storage.get_profile(uid) # Re-obtener datos
                     self.email_service.send_alert(email_destino, uid, motivo_alerta, profile_data)
+            if self.sentiment.check_for_alert(msg.text) and self.email_service:
+                # Registramos el evento y verificamos si se alcanzó el umbral de 5 alertas en 12 horas.
+                should_send_alert = self.sentiment.register_and_check_alert_threshold(
+                    storage_client=self.storage,
+                    user_id=uid,
+                    alert_threshold=5,
+                    hours_window=12
+                )
+
+                if should_send_alert:
+                    email_destino = profile.get("contacto_emergencia")
+                    if email_destino:
+                        motivo_alerta = f"Se detectaron {5} o más mensajes con sentimientos de alerta en las últimas {12} horas."
+                        self.email_service.send_alert(email_destino, uid, motivo_alerta, profile)
 
         @self.bot.message_handler(content_types=["voice"])
         def handle_voice(msg):

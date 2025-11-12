@@ -45,6 +45,35 @@ class SentimentAnalyzer:
                 return True
         return False
         
+    def register_and_check_alert_threshold(self, storage_client, user_id: int, alert_threshold: int = 5, hours_window: int = 12) -> bool:
+        """
+        Registra una nueva instancia de sentimiento de alerta y verifica si se ha
+        superado el umbral en las últimas X horas.
+
+        Args:
+            storage_client: El cliente de almacenamiento (Firebase/JSON) para acceder a los perfiles.
+            user_id: El ID del usuario.
+            alert_threshold (int): El número de alertas para activar el aviso (ej: 5).
+            hours_window (int): La ventana de tiempo en horas para contar las alertas (ej: 12).
+
+        Returns:
+            bool: True si se debe enviar la alerta, False en caso contrario.
+        """
+        profile = storage_client.get_profile(user_id) or {}
+        
+        now = time.time()
+        # Filtramos timestamps antiguos y añadimos el nuevo
+        time_window_seconds = hours_window * 60 * 60
+        
+        # Obtenemos los timestamps, si no existen, creamos una lista vacía
+        recent_alerts = [t for t in profile.get("alert_timestamps", []) if now - t < time_window_seconds]
+        recent_alerts.append(now)
+        
+        profile["alert_timestamps"] = recent_alerts
+        storage_client.save_profile(user_id, profile)
+        
+        return len(recent_alerts) >= alert_threshold
+
     def analyze(self, text: str) -> dict:
         """
         Analiza el sentimiento y devuelve un dict con 'label' y 'score'.
