@@ -103,13 +103,9 @@ class FirebaseStorage(AbstractStorage):
 # --- Factory (Fábrica) ---
 
 def get_storage_client() -> AbstractStorage:
-    if getattr(config, "USE_CLOUD_STORAGE", False):
-        path = getattr(config, "GOOGLE_CREDENTIALS_PATH", "")
-        if not path or not os.path.exists(path):
-            print(f"💾 Usando almacenamiento local (JSON) (no se encontró GOOGLE_CREDENTIALS_PATH='{path}')")
-            return JSONStorage()
-        print(f"☁️ Usando Firebase Cloud Storage (encontrado: {path})")
-        return FirebaseStorage()
-    else:
-        print("💾 Usando almacenamiento local (JSON)")
+    path = getattr(config, "GOOGLE_CREDENTIALS_PATH", "")
+    if not path or not os.path.exists(path):
+        print(f"💾 Usando almacenamiento local (JSON) (no se encontró GOOGLE_CREDENTIALS_PATH='{path}')")
         return JSONStorage()
+    print(f"☁️ Usando Firebase Cloud Storage (encontrado: {path})")
+    return FirebaseStorage()

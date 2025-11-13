@@ -19,7 +19,7 @@ MAKE_WEBHOOK_URL = os.getenv("MAKE_WEBHOOK_URL")
 
 # --- Modelos (Groq) ---
 NLU_MODEL = os.getenv("NLU_MODEL", "llama-3.3-70b-versatile")
-INTENT_MODEL = os.getenv("INTENT_MODEL", NLU_MODEL)
+INTENT_MODEL = os.getenv("INTENT_MODEL", "llama-3.1-8b-instant")
 VISION_MODEL = os.getenv("VISION_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct")
 
 # Resolver ruta ABSOLUTA para la credencial de Firebase
