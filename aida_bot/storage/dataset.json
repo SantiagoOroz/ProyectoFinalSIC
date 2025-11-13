@@ -4,205 +4,171 @@
     "question": "¿Cómo subo el volumen del celular?",
     "answer": "Para subir el volumen, usá los botones que están en el costado del celular. El de arriba lo sube, el de abajo lo baja."
   },
-  
   {
     "id": 2,
     "question": "¿Cómo bajo el volumen del celular?",
     "answer": "Usá el botón de volumen que está en el costado. El de abajo baja el volumen."
   },
-
   {
     "id": 3,
     "question": "¿Cómo saco una foto?",
     "answer": "Abrí la aplicación de cámara, apuntá al objeto y tocá el botón circular grande para sacar la foto."
   },
-
   {
     "id": 4,
     "question": "¿Cómo grabo un video?",
     "answer": "En la aplicación de cámara, cambiá a 'video' y tocá el botón rojo para empezar a grabar."
   },
-
   {
     "id": 5,
     "question": "¿Cómo mando un mensaje de voz?",
     "answer": "En WhatsApp, mantené apretado el ícono del micrófono, hablá y soltalo para enviarlo."
   },
-
   {
     "id": 6,
     "question": "¿Cómo hago una videollamada?",
     "answer": "En WhatsApp, abrí un chat y tocá el ícono de cámara en la esquina superior para iniciar la videollamada."
   },
-
   {
     "id": 7,
     "question": "¿Qué es Wi-Fi?",
     "answer": "Es la conexión inalámbrica a internet. Podés conectarte en tu casa o en lugares públicos con red Wi-Fi."
   },
-
   {
     "id": 8,
     "question": "¿Cómo me conecto a Wi-Fi?",
     "answer": "En tu celular, andá a 'Ajustes', buscá 'Wi-Fi', elegí la red y escribí la contraseña si lo pide."
   },
-
   {
     "id": 9,
     "question": "¿Qué es una aplicación?",
     "answer": "Es un programa que usás en tu celular, como WhatsApp, YouTube o Facebook."
   },
-
   {
     "id": 10,
     "question": "¿Cómo descargo una aplicación?",
     "answer": "Abrí la Play Store o App Store, buscá el nombre de la app y tocá 'Instalar'."
   },
-
   {
     "id": 11,
     "question": "¿Cómo elimino una aplicación?",
     "answer": "Mantené apretado el ícono de la app y seleccioná 'Desinstalar'."
   },
-
   {
     "id": 12,
     "question": "¿Cómo busco algo en Google?",
     "answer": "Abrí la aplicación de Google, escribí lo que quieras y tocá la lupa para buscar."
   },
-
   {
     "id": 13,
     "question": "¿Cómo reviso la batería del celular?",
     "answer": "En la parte superior de la pantalla está el ícono de la batería con el porcentaje disponible."
   },
-
   {
     "id": 14,
     "question": "¿Cómo pongo una alarma?",
     "answer": "Abrí la app de Reloj, tocá 'Alarma' y seleccioná la hora que quieras."
   },
-
   {
     "id": 15,
     "question": "¿Cómo configuro la hora del celular?",
     "answer": "En 'Ajustes' buscá 'Fecha y hora'. Podés ponerla manualmente o en automático."
   },
-
   {
     "id": 16,
     "question": "¿Cómo mando un mensaje de texto?",
     "answer": "Abrí la app de Mensajes, escribí el número o contacto y tu mensaje, luego tocá 'Enviar'."
   },
-
   {
     "id": 17,
     "question": "¿Cómo guardo un contacto?",
     "answer": "Abrí la app de Contactos, tocá 'Agregar nuevo', escribí nombre y número, y guardá."
   },
-
   {
     "id": 18,
     "question": "¿Cómo borro un contacto?",
     "answer": "En la app de Contactos, abrí el contacto y tocá 'Eliminar'."
   },
-
   {
     "id": 19,
     "question": "¿Cómo comparto una foto?",
     "answer": "Abrí la foto, tocá el ícono de 'Compartir' y elegí la app o contacto."
   },
-
   {
     "id": 20,
     "question": "¿Cómo veo las fotos que saqué?",
     "answer": "Abrí la app de Galería o Google Fotos para ver tus imágenes guardadas."
   },
-
   {
     "id": 21,
     "question": "¿Cómo borro una foto?",
     "answer": "Abrí la foto, tocá el ícono de papelera y confirmá."
   },
-
   {
     "id": 22,
     "question": "¿Cómo envío mi ubicación?",
     "answer": "En WhatsApp, tocá el clip, elegí 'Ubicación' y luego 'Enviar mi ubicación actual'."
   },
-
   {
     "id": 23,
     "question": "¿Cómo busco una calle en Google Maps?",
     "answer": "Abrí Maps, escribí el nombre de la calle en la barra de búsqueda y tocá 'Ir'."
   },
-
   {
     "id": 24,
     "question": "¿Cómo activo la linterna?",
     "answer": "Deslizá hacia abajo la pantalla y tocá el ícono de linterna."
   },
-
   {
     "id": 25,
     "question": "¿Cómo cambio el brillo de la pantalla?",
     "answer": "Deslizá hacia abajo la pantalla y mové la barra de brillo."
   },
-
   {
     "id": 26,
     "question": "¿Cómo apago el celular?",
     "answer": "Mantené apretado el botón de encendido y seleccioná 'Apagar'."
   },
-
   {
     "id": 27,
     "question": "¿Cómo reinicio el celular?",
     "answer": "Mantené apretado el botón de encendido y elegí 'Reiniciar'."
   },
-
   {
     "id": 28,
     "question": "¿Cómo conecto auriculares Bluetooth?",
     "answer": "En 'Ajustes' buscá 'Bluetooth', activalo, elegí tu auricular y tocá 'Conectar'."
   },
-
   {
     "id": 29,
     "question": "¿Qué hago si el celular no responde?",
     "answer": "Mantené apretado el botón de encendido por varios segundos hasta que se apague y prendelo de nuevo."
   },
-
   {
     "id": 30,
     "question": "¿Cómo cambio el idioma del celular?",
     "answer": "En 'Ajustes', buscá 'Idioma' o 'Idioma y entrada' y seleccioná el que quieras."
   },
-
   {
     "id": 31,
     "question": "¿Cómo creo una cuenta en Mercado Pago?",
     "answer": "Descargá la aplicación de Mercado Pago desde la tienda de apps. Abrila, tocá 'Crear cuenta' y completá tus datos personales como nombre, DNI y correo electrónico."
   },
-
   {
     "id": 32,
     "question": "¿Cómo agrego dinero a mi cuenta de Mercado Pago?",
     "answer": "En la aplicación, tocá 'Ingresar dinero'. Podés hacerlo con transferencia bancaria, tarjeta de débito o en efectivo en puntos habilitados como Pago Fácil o Rapipago."
   },
-
   {
     "id": 33,
     "question": "¿Cómo pago una factura con Mercado Pago?",
     "answer": "Abrí la app de Mercado Pago, tocá 'Pagar servicios', escaneá el código de barras de la factura con la cámara del celular o ingresá el número de cliente, y seguí los pasos para pagar."
   },
-
   {
     "id": 34,
     "question": "¿Cómo veo si ya pagué una factura en Mercado Pago?",
     "answer": "En la app, tocá en 'Actividad'. Ahí vas a encontrar el historial de todos tus pagos y transferencias realizados."
   },
-
   {
     "id": 35,
     "question": "¿Cómo transfiero dinero a otra persona con Mercado Pago?",

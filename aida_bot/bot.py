@@ -52,7 +52,6 @@ class SessionManager:
 class ModularBot:
     """Plantilla general del bot orientado a objetos."""
     
-    # <--- MODIFICACIÓN 1: Añadir email_service al init ---
     def __init__(self, bot_instance, nlu, speech, vision, sentiment, sessions, storage_client, translator, email_service):
         self.bot = bot_instance
         self.nlu = nlu
@@ -238,14 +237,10 @@ class ModularBot:
         # <--- MODIFICACIÓN 2: Usar el handle_start de "botfinal" ---
         @self.bot.message_handler(commands=["start"])
         def handle_start(msg):
-            user_id = msg.from_user.id
-            profile = self.storage.get_profile(user_id)
-            
-            if profile is not None: 
-                uid = msg.chat.id
-                profile = self.storage.get_profile(uid) or {}
-                required = ("autonomia", "foco", "entorno")
-                missing = any(k not in profile or not profile[k] for k in required)
+            uid = msg.chat.id
+            profile = self.storage.get_profile(uid) or {}
+            required = ("autonomia", "foco", "entorno")
+            missing = any(k not in profile or not profile[k] for k in required)
 
             if missing:
                 # Lanzar formulario de onboarding
@@ -294,7 +289,7 @@ class ModularBot:
             # 1. Si el usuario está respondiendo al formulario (ej. dando su nombre o email)
             if profile.get("esperando_nombre") or profile.get("esperando_contacto"):
                 self.onboarding.handle_text_response(msg)
-                return # Detener aquí, no es un chat normal
+                return  # Detener aquí, no es un chat normal
 
             # --- Lógica de "perfil incompleto" (de rama_memoria) ---
             # 2. Si el usuario no ha completado el formulario inicial
@@ -310,12 +305,6 @@ class ModularBot:
 
             # --- Lógica de Alertas (de botfinal) ---
             # 4. Verificar si el mensaje contiene palabras de alerta
-            if self.sentiment.check_for_alert(msg.text):
-                email_destino = profile.get("contacto_emergencia")
-                if email_destino and self.email_service:
-                    motivo_alerta = "Palabras potencialmente peligrosas detectadas en el chat."
-                    profile_data = self.storage.get_profile(uid) # Re-obtener datos
-                    self.email_service.send_alert(email_destino, uid, motivo_alerta, profile_data)
             if self.sentiment.check_for_alert(msg.text) and self.email_service:
                 # Registramos el evento y verificamos si se alcanzó el umbral de 5 alertas en 12 horas.
                 should_send_alert = self.sentiment.register_and_check_alert_threshold(
@@ -328,7 +317,7 @@ class ModularBot:
                 if should_send_alert:
                     email_destino = profile.get("contacto_emergencia")
                     if email_destino:
-                        motivo_alerta = f"Se detectaron {5} o más mensajes con sentimientos de alerta en las últimas {12} horas."
+                        motivo_alerta = f"Se detectaron 5 o más mensajes con sentimientos de alerta en las últimas 12 horas."
                         self.email_service.send_alert(email_destino, uid, motivo_alerta, profile)
 
         @self.bot.message_handler(content_types=["voice"])

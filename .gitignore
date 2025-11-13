@@ -11,7 +11,6 @@ aida_bot/serviceAccountKey.json
 aida_bot/*.json
 service-account.json
 file_FF_private.json
-
 # --- Archivos de Python ---
 __pycache__/
 *.pyc
