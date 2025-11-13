@@ -3,12 +3,12 @@ from langdetect import detect
 
 class Translator:
 
-    def __init__(self, api_key: str, api_url="https://api.groq.com/openai/v1/chat/completions", model="llama-3.3-70b-versatile"):
+    def __init__(self, api_key: str, api_url="https://api.groq.com/openai/v1/chat/completions", model="llama-3.1-8b-instant"):
         self.api_key = api_key
         self.api_url = api_url
         self.model = model
         self.system_prompt = (
-             """1. Eres un traductor profesional.
+            """1. Eres un traductor profesional.
                 2. Estás especializado en educación digital y comunicación inclusiva.
                 3. Tu tarea es traducir contenido educativo y de asistencia tecnológica destinado a personas mayores.
                 4. Mantén siempre un tono amable, claro y fácil de entender.

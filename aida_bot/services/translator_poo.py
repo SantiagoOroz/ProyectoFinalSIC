@@ -4,7 +4,7 @@ from langdetect import detect, LangDetectException
 
 class DatasetTranslator:
 
-    def __init__(self, api_key: str, api_url="https://api.groq.com/openai/v1/chat/completions", model="llama-3.3-70b-versatile"):
+    def __init__(self, api_key: str, api_url="https://api.groq.com/openai/v1/chat/completions", model="llama-3.1-8b-instant"):
         self.api_key = api_key
         self.api_url = api_url
         self.model = model

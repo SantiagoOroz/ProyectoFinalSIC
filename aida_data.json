@@ -1,10 +1,69 @@
 {
     "sessions": {
         "8377401401": {
-            "greeted": true,
-            "context": [],
-            "responder_con_audio": false,
-            "tts_voice": "es-AR-TomasNeural"
+            "history": [
+                {
+                    "role": "user",
+                    "text": "Te quiero besar sos perfecta para mí (El usuario parece feliz o agradecido. Responde con calidez).",
+                    "ts": "2025-11-13T05:52:31Z"
+                },
+                {
+                    "role": "assistant",
+                    "text": "Santi, gracias por tu cariño. Me hace muy feliz saber que te sientes cómodo y apoyado. Aunque no puedo recibirlas, aprecio mucho tus palabras de afecto. ¿Hay algo en particular que te gustaría aprender o explorar en el mundo de la tecnología hoy? Estoy aquí para ayudarte y compartir tu entusiasmo.",
+                    "ts": "2025-11-13T05:52:31Z"
+                },
+                {
+                    "role": "user",
+                    "text": "¿Qué día es hoy?",
+                    "ts": "2025-11-13T05:53:07Z"
+                },
+                {
+                    "role": "assistant",
+                    "text": "Santi, para saber el día de hoy, puedes mirar en tu celular. Abre la pantalla de inicio y busca la fecha en la parte superior. También puedes preguntar a tu asistente de voz, como Siri o Google Assistant, \"¿Qué día es hoy?\" y te darán la respuesta. ¿Quieres aprender más sobre cómo usar tu asistente de voz?",
+                    "ts": "2025-11-13T05:53:08Z"
+                },
+                {
+                    "role": "user",
+                    "text": "¿Qué día es hoy?",
+                    "ts": "2025-11-13T05:53:18Z"
+                },
+                {
+                    "role": "assistant",
+                    "text": "Santi, ya te dije que puedes mirar en tu celular o preguntar a tu asistente de voz. ¿Quieres que te explique paso a paso cómo hacerlo?",
+                    "ts": "2025-11-13T05:53:19Z"
+                },
+                {
+                    "role": "user",
+                    "text": "Te falla",
+                    "ts": "2025-11-13T05:53:23Z"
+                },
+                {
+                    "role": "assistant",
+                    "text": "Santi, no te preocupes. A veces podemos cometer errores. ¿Quieres que volvamos a intentarlo? ¿En qué te puedo ayudar hoy?",
+                    "ts": "2025-11-13T05:53:23Z"
+                },
+                {
+                    "role": "user",
+                    "text": "Soy de River yo",
+                    "ts": "2025-11-13T05:53:33Z"
+                },
+                {
+                    "role": "assistant",
+                    "text": "Santi, ¡genial! Ser hincha de River es muy emocionante. ¿Quieres saber cómo ver los partidos de River en tu celular o cómo mantenerse al tanto de las noticias del equipo? Estoy aquí para ayudarte.",
+                    "ts": "2025-11-13T05:53:33Z"
+                },
+                {
+                    "role": "user",
+                    "text": "De que equipo soy hincha?",
+                    "ts": "2025-11-13T05:53:45Z"
+                },
+                {
+                    "role": "assistant",
+                    "text": "Santi, recuerdo que me dijiste que eras hincha de River. ¿Quieres saber algo sobre el equipo o cómo ver sus partidos?",
+                    "ts": "2025-11-13T05:53:46Z"
+                }
+            ],
+            "updatedAt": "2025-11-13T05:53:46Z"
         },
         "5371761540": {
             "greeted": false,
@@ -17,7 +76,8 @@
         "8377401401": {
             "autonomia": "A",
             "foco": "D",
-            "entorno": "A"
+            "entorno": "A",
+            "displayName": "Santi"
         }
     }
 }
