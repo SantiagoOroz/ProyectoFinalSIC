@@ -1,4 +1,31 @@
 {
-    "sessions": {},
-    "profiles": {}
+    "sessions": {
+        "8377401401": {
+            "history": [
+                {
+                    "role": "user",
+                    "text": "Hola, soy fan de River Plate",
+                    "ts": "2025-11-13T12:17:27Z"
+                },
+                {
+                    "role": "assistant",
+                    "text": "Hola Santi, ya me contaste que eres fan de River Plate. ¿Quieres saber cómo buscar noticias sobre tu equipo en internet?",
+                    "ts": "2025-11-13T12:17:28Z"
+                }
+            ],
+            "updatedAt": "2025-11-13T12:17:28Z"
+        }
+    },
+    "profiles": {
+        "8377401401": {
+            "autonomia": "A",
+            "foco": "B",
+            "entorno": "B",
+            "esperando_nombre": false,
+            "nombre_apellido": "Santiago Chávez",
+            "esperando_contacto": false,
+            "contacto_emergencia": "santiago.oroz1510@gmail.com",
+            "displayName": "Santi"
+        }
+    }
 }
