@@ -15,11 +15,10 @@ NAMESPACE = f"{ENV}:{BOT_ID}"
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_API_URL = os.getenv("GROQ_API_URL", "https://api.groq.com/openai/v1/chat/completions")
-MAKE_WEBHOOK_URL = os.getenv("MAKE_WEBHOOK_URL") # <--- AÑADIR ESTA LÍNEA
+MAKE_WEBHOOK_URL = os.getenv("MAKE_WEBHOOK_URL")
 
 # --- Modelos (Groq) ---
-# Nota: llama3-8b-8192 fue deprecado
-NLU_MODEL = os.getenv("NLU_MODEL", "llama-3.1-8b-instant")
+NLU_MODEL = os.getenv("NLU_MODEL", "llama-3.3-70b-versatile")
 INTENT_MODEL = os.getenv("INTENT_MODEL", NLU_MODEL)
 VISION_MODEL = os.getenv("VISION_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct")
 

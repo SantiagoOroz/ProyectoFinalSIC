@@ -63,8 +63,6 @@ class JSONStorage(AbstractStorage):
 
 # --- Implementación 2: Almacenamiento en Firebase ---
 
-# --- Implementación 2: Almacenamiento en Firebase ---
-
 class FirebaseStorage(AbstractStorage):
     """Implementación de almacenamiento usando Google Firebase Firestore con estructura organizada."""
     
@@ -99,7 +97,6 @@ class FirebaseStorage(AbstractStorage):
     def save_session(self, chat_id: int, session_data: dict):
         self.sessions_col.document(str(chat_id)).set(session_data)
 
-
 # --- Factory (Fábrica) ---
 
 def get_storage_client() -> AbstractStorage:
@@ -113,4 +110,3 @@ def get_storage_client() -> AbstractStorage:
     else:
         print("💾 Usando almacenamiento local (JSON)")
         return JSONStorage()
-

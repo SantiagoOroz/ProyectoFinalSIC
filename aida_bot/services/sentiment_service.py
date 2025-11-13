@@ -73,7 +73,6 @@ class SentimentAnalyzer:
         storage_client.save_profile(user_id, profile)
         
         return len(recent_alerts) >= alert_threshold
-
     def analyze(self, text: str) -> dict:
         """
         Analiza el sentimiento y devuelve un dict con 'label' y 'score'.

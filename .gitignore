@@ -10,6 +10,7 @@
 aida_bot/serviceAccountKey.json
 aida_bot/*.json
 service-account.json
+file_FF_private.json
 
 # --- Archivos de Python ---
 __pycache__/
@@ -27,4 +28,3 @@ Thumbs.db
 
 # --- Node (por si el proyecto crece) ---
 node_modules/
-aida_bot/serviceAccountKey.json

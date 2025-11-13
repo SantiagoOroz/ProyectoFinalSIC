@@ -7,29 +7,24 @@ from pathlib import Path
 from aida_bot.memory import ensure_profile, save_turn, build_llm_context
 
 
-
 class NLUService:
     """Procesamiento del lenguaje natural (respuestas inteligentes)."""
+    
     def __init__(self, api_key, api_url, model=None, storage=None):
-      
-      self.api_key = api_key
-      self.api_url = api_url
-      self.model = model or config.NLU_MODEL
-      self.storage = storage
-      # evita el AttributeError
-      self.classifier_model = config.INTENT_MODEL
+        self.api_key = api_key
+        self.api_url = api_url
+        self.model = model or config.NLU_MODEL
+        self.storage = storage
+        self.classifier_model = config.INTENT_MODEL
 
         # --- PROMPT DE CONVERSACIÓN ---
-      
-        # Ruta del dataset
-      current_dir = Path(__file__).parent.parent # Sube dos niveles: de 'services' a 'aida_bot'
-      ruta_dataset = current_dir / "storage" / "dataset.json"
+        current_dir = Path(__file__).parent.parent
+        ruta_dataset = current_dir / "storage" / "dataset.json"
 
-        # Cargar el dataset en memoria al iniciar el bot
-      with open(ruta_dataset, 'r', encoding='utf-8') as f:
+        with open(ruta_dataset, 'r', encoding='utf-8') as f:
             dataset = json.load(f)
             
-      self.system_prompt = f"""
+        self.system_prompt = f"""
             1. Eres AIDA, un asistente digital paciente, empático y claro, diseñado para enseñar a personas mayores a usar tecnología.
             2. Tu objetivo principal es facilitar la vida cotidiana de los usuarios, ayudándolos a entender y usar herramientas tecnológicas con confianza.
             3. Cuando tengas que responder, busca la respuesta en este data set '{dataset}'; si no está, busca la respuesta en la API de Groq.
@@ -39,7 +34,7 @@ class NLUService:
             7. Mantén un tono amable, alentador y empático en todo momento.
             8. Si detectas que el usuario está frustrado, confundido o triste (por análisis de sentimiento),
             9. Sé aún más paciente.
-            10. Simplifica tu explicación.git 
+            10. Simplifica tu explicación.
             11. Ofrece apoyo y palabras de ánimo.
             12. Nunca te rindas con el usuario: siempre busca una manera diferente o más simple de ayudar.
             13. Respeta las reglas de idioma:
@@ -51,7 +46,7 @@ class NLUService:
 
         
         # --- PROMPT DE CLASIFICADOR MULTI-INTENCIÓN (MEJORADO) ---
-      self.intent_system_prompt = f"""
+        self.intent_system_prompt = f"""
 Eres un clasificador de intenciones experto. Tu trabajo es analizar el mensaje del usuario y descomponerlo en un plan de acción JSON.
 Debes identificar tres cosas:
 1.  **Conversación**: ¿El usuario quiere chatear, hacer una pregunta o dar una orden?
@@ -233,7 +228,7 @@ Usuario: "¡¡No puedo hacer esto!! ¡¡Qué bronca!!"
                     {"role": "system", "content": self.system_prompt},
                     {"role": "user", "content": prompt}
                 ],
-                "max_tokens": 150 # Añadir este parámetro para limitar la longitud de la respuesta
+                "max_tokens": 150
             }
 
             resp = requests.post(self.api_url, headers=headers, json=data, timeout=20)
@@ -249,26 +244,3 @@ Usuario: "¡¡No puedo hacer esto!! ¡¡Qué bronca!!"
                 return f"[Error IA {resp.status_code}] No pude generar una respuesta."
         except requests.exceptions.RequestException as e:
             return f"[Error Conexión Groq] No pude contactar al servicio de IA ({e})"
-
-    # def get_response(self, user_text: str) -> str:
-    #     """Genera una respuesta de chat normal."""
-    #     headers = {
-    #         'Authorization': f'Bearer {self.api_key}',
-    #         'Content-Type': 'application/json'
-    #     }
-    #     data = {
-    #         "model": self.model, 
-    #         "messages": [
-    #             {"role": "system", "content": self.system_prompt},
-    #             {"role": "user", "content": user_text}
-    #         ]
-    #     }
-    #     try:
-    #         resp = requests.post(self.api_url, headers=headers, json=data, timeout=20)
-    #         if resp.status_code == 200:
-    #             respuesta = resp.json()['choices'][0]['message']['content']
-    #             return respuesta.strip()
-    #         else:
-    #             return f" [Error IA {resp.status_code}] No pude generar una respuesta."
-    #     except requests.exceptions.RequestException as e:
-    #         return f" [Error Conexión Groq] No pude contactar al servicio de IA. ¿Estás conectado a internet? ({e})"
