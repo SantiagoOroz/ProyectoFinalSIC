@@ -1,0 +1,30 @@
+# --- Variables y credenciales ---
+.env
+*.env
+*.key
+*.pem
+*.p12
+
+# --- Claves y JSON de servicio ---
+# Firebase / Google Cloud Service Account
+aida_bot/serviceAccountKey.json
+aida_bot/*.json
+service-account.json
+
+# --- Archivos de Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pytest_cache/
+.venv/
+venv/
+env/
+
+# --- Archivos de entorno/IDE/OS ---
+.vscode/
+.DS_Store
+Thumbs.db
+
+# --- Node (por si el proyecto crece) ---
+node_modules/
+aida_bot/serviceAccountKey.json
