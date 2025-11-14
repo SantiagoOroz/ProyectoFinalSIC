@@ -3,8 +3,8 @@
 **AIDA (Asistente Digital Unificado)** es un chatbot de Telegram modular y empático, diseñado para acompañar, enseñar y ayudar a adultos mayores a navegar el mundo de la tecnología con paciencia y claridad.
 
 Este proyecto fue desarrollado como el **Trabajo Final del Samsung Innovation Campus**.
-* [**Flujos del proceso, hechos con mermaid**](https://drive.google.com/drive/folders/1fdrQno89sITk2tT1_y0nFCjlRVw-2BVC?usp=sharing)
-* [**Video de presentación AIDA:**](https://youtu.be/Sl-CFzgz-u0)
+* [**Video de presentación AIDA**](https://youtu.be/Sl-CFzgz-u0)
+
 ---
 
 ## 👨‍💻 Integrantes del Equipo
@@ -12,7 +12,7 @@ Este proyecto fue desarrollado como el **Trabajo Final del Samsung Innovation Ca
 * [**Santiago Oroz**](https://www.linkedin.com/in/santiago-oroz/)
 * [**Renata Berho**](https://www.linkedin.com/in/renata-ana-emilia-berho-02264230a/)
 * [**Milagros Argañin**](https://www.linkedin.com/in/milagros-arga%C3%B1in-13641a376/)
-
+* Contacto: aidaassistantbot@gmail.com
 ---
 
 ## 📜 Índice
@@ -61,6 +61,7 @@ Este bot no es solo un chat, sino un sistema de asistencia integral que incluye:
 | **Audio** | `pydub` | Procesamiento y conversión de archivos de audio. |
 | **Utilidades** | `langdetect` | Detección de idioma para traducción. |
 
+* [**Flujos del proceso, hechos con mermaid**](https://drive.google.com/drive/folders/1fdrQno89sITk2tT1_y0nFCjlRVw-2BVC?usp=sharing)
 ---
 
 ## 📁 Arquitectura del Proyecto
