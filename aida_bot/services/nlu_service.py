@@ -170,8 +170,9 @@ Usuario: "¡¡No puedo hacer esto!! ¡¡Qué bronca!!"
                 {"role": "user", "content": user_text}
             ],
             "response_format": {"type": "json_object"},
-            "temperature": 0.0
-        }
+            "temperature": 0.0,
+            "max_tokens": 150
+          }
         
         # Estructura de fallback en caso de error
         default_response = {

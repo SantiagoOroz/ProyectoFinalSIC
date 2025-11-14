@@ -15,9 +15,8 @@ class Translator:
                 5. Evita los tecnicismos innecesarios o palabras difíciles.
                 6. Conserva el significado educativo y respeta el contexto original del texto.
                 7. Cuando se te indique un cambio de idioma, realiza la traducción al nuevo idioma.
-                8. Si una persona te habla en un idioma determinado, responde en ese mismo idioma.
-                9. No cambies de idioma hasta que se te dé una nueva indicación explícita.
-                10.Tu objetivo es facilitar la comprensión y hacer accesible la información a los adultos mayores."""
+                8. Si una persona te habla en un idioma, responde en ese mismo idioma.
+                9. Tu objetivo es facilitar la comprensión y hacer accesible la información a los adultos mayores."""
         )
 
     def detect_language(self, text: str) -> str:
@@ -41,7 +40,8 @@ class Translator:
             "messages": [
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": f"Traduce este texto al idioma '{target_lang}': {text}"}
-            ]
+            ],
+            "max_tokens": 200,
         }
 
         try:
