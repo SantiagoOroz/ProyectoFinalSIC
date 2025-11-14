@@ -12,6 +12,18 @@ from aida_bot.features.user_profiles import ProfileOnboarding
 from aida_bot.memory import ensure_profile, save_turn, build_llm_context
 
 
+def escape_markdown(text: str) -> str:
+    """
+    Escapa caracteres especiales de Markdown para que Telegram pueda parsear correctamente.
+    Evita el error: "Can't parse entities"
+    """
+    # Caracteres que necesitan escape en Markdown v2
+    escape_chars = r'_*[]()~`>#+-=|{}.!'
+    for char in escape_chars:
+        text = text.replace(char, f'\\{char}')
+    return text
+
+
 class SessionManager:
     """
     Manejo de sesiones de usuario (estado, configuración, contexto).
@@ -119,7 +131,9 @@ class ModularBot:
         Primero envía el texto y luego, si está activado, el audio
         CON LA VOZ SELECCIONADA POR EL USUARIO.
         """
-        self.bot.reply_to(msg, response_text, parse_mode="Markdown")
+        # Escapar caracteres especiales de Markdown para evitar errores de parsing
+        safe_response = escape_markdown(response_text)
+        self.bot.reply_to(msg, safe_response, parse_mode="MarkdownV2")
         
         session = self.sessions.ensure(msg.chat.id)
         
