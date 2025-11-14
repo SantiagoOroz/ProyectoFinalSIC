@@ -179,4 +179,3 @@ A todas las personas que hicieron posible la experiencia del curso **Samsung Cam
   * **Asociación Conciencia**: Por su dedicación, por facilitarnos el espacio de aprendizaje y por su compromiso con la inclusión digital.
 
 <!-- end list -->
-# Prueba desde servidor
