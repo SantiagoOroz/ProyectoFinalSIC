@@ -41,18 +41,7 @@ def main():
 
     translator = Translator(api_key=config.GROQ_API_KEY)
 
-    # 4.1 Instancia del onboarding (perfil del usuario)
-    onboarding = ProfileOnboarding(bot_instance=bot, storage_client=storage)
-
-    # /start siempre dispara el onboarding
-    @bot.message_handler(commands=['start'])
-    def _start(msg):
-        onboarding.start_onboarding(msg)
-
-    # Manejo de los botones del formulario (autonomía/foco/entorno)
-    @bot.callback_query_handler(func=lambda q: q.data and q.data.startswith("onboarding_"))
-    def _onboarding_cb(q):
-        onboarding.handle_callback(q)
+    # El onboarding se maneja desde ModularBot para evitar handlers duplicados
     # 5. Instancia principal del Bot
     aida_bot = ModularBot(
         bot_instance=bot,

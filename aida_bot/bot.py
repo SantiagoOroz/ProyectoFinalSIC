@@ -234,25 +234,17 @@ class ModularBot:
 
     def _setup_handlers(self):
         
-        # <--- MODIFICACIÓN 2: Usar el handle_start de "botfinal" ---
         @self.bot.message_handler(commands=["start"])
         def handle_start(msg):
-            uid = msg.chat.id
-            profile = self.storage.get_profile(uid) or {}
-            required = ("autonomia", "foco", "entorno")
-            missing = any(k not in profile or not profile[k] for k in required)
-
-            if missing:
-                # Lanzar formulario de onboarding
+            # Siempre forzar el onboarding para actualizar preferencias
+            try:
                 self.onboarding.start_onboarding(msg, force_retry=True)
-            else:
-                markup = types.InlineKeyboardMarkup()
-                markup.add(types.InlineKeyboardButton("Actualizar mis preferencias", callback_data="start_onboarding_retry"))
-                self.bot.reply_to(
-                    msg,
-                    "¡Hola de nuevo! Ya te conozco. 😊 ¿En qué te puedo ayudar hoy?",
-                    reply_markup=markup
-                )
+            except Exception as e:
+                print(f"[ERROR START] {e}")
+                try:
+                    self.bot.reply_to(msg, "⚠️ Ocurrió un error al iniciar el onboarding.")
+                except Exception:
+                    pass
 
         @self.bot.callback_query_handler(func=lambda query: True)
         def handle_callback_query(query):
