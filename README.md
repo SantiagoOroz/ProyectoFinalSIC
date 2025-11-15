@@ -136,27 +136,32 @@ santiagooroz-proyectofinalsic/
 2.  Abre el archivo `.env` y rellena tus claves API:
 
     ```ini
-    # === REQUERIDO ===
-    # Token de Telegram obtenido de @BotFather
-    TELEGRAM_TOKEN="TU_TOKEN_DE_TELEGRAM_AQUI"
+   # Renombra este archivo a .env y rellena tus claves
+   
+   # === REQUERIDO ===
+   # Token de Telegram obtenido de @BotFather
+   TELEGRAM_TOKEN = PONER_TELE_TOKEN
+   
+   # API Key de Groq (https://console.groq.com/keys)
+   GROQ_API_KEY= PONER_GROQ_KEY
+   
+   # URL de la API de Groq (generalmente no cambia)
+   GROQ_API_URL="https://api.groq.com/openai/v1/chat/completions"
+   
+   # .env
+   
+   # 1. El modelo principal (potente) para conversar
+   NLU_MODEL="llama-3.3-70b-versatile"
+   
+   # 2. El modelo (débil y rápido) solo para clasificar
+   INTENT_MODEL="llama-3.1-8b-instant"
+   
+   # === OPCIONAL: ALERTAS ===
+   # URL del Webhook de Make.com para enviar emails de alerta
+   MAKE_WEBHOOK_URL="https://hook.us2.make.com/zqs8y6j5w9g5fogn1paxobvojh854eqm"
 
-    # API Key de Groq ([https://console.groq.com/keys](https://console.groq.com/keys))
-    GROQ_API_KEY="TU_API_KEY_DE_GROQ_AQUI"
-
-    # URL de la API de Groq (generalmente no cambia)
-    GROQ_API_URL="[https://api.groq.com/openai/v1/chat/completions](https://api.groq.com/openai/v1/chat/completions)"
-
-
-    # === OPCIONAL: PERSISTENCIA EN LA NUBE ===
-    # Si quieres usar Google Firebase para guardar datos:
-    # 1. Crea un proyecto en Firebase y activa Firestore.
-    # 2. Descarga tu 'service-account.json'.
-    # 3. Coloca ese archivo JSON en la raíz del proyecto.
-    # 4. Escribe el nombre de ese archivo aquí:
-    # GOOGLE_APPLICATION_CREDENTIALS="service-account.json"
-
-    # Si dejas GOOGLE_APPLICATION_CREDENTIALS vacío, el bot
-    # guardará todos los perfiles en el archivo local 'aida_data.json'.
+   GOOGLE_APPLICATION_CREDENTIALS="service-account.json"
+   # Sin credenciales de firebase, se guardarán todos los perfiles en un archivo local 'aida_data.json'.
     ```
 
 ---
