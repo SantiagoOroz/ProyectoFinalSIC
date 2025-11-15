@@ -105,6 +105,7 @@ santiagooroz-proyectofinalsic/
 * Python 3.10 o superior.
 * Una cuenta de Telegram y un [Token de Bot](https://t.me/BotFather).
 * Una [API Key de Groq](https://console.groq.com/keys).
+* Tener [FFmpeg](https://www.ffmpeg.org/) instalado y en path (para función de sintetización). [Guía de instalación](https://blog-gregzaal-com.translate.goog/how-to-install-ffmpeg-on-windows/?_x_tr_sl=en&_x_tr_tl=es&_x_tr_hl=es&_x_tr_pto=tc).
 
 ### 2. Instalación
 
